@@ -30,18 +30,18 @@ class ICQLMAC(BasicMAC):
         # Use either the IQL agents from the BasicMAC for sampling ...
         if not use_critic:
             return BasicMAC.select_actions(self, ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
-        # ... or use the critic conditioned greedy actions of the IQL agents for sampling
+        # ... or use the critic conditioned on greedy actions of the IQL agents for sampling
         avail_actions = ep_batch["avail_actions"][bs, t_ep]
-        greedy_actions = self.greedy_actions(ep_batch, t_ep, bs, avail_actions=avail_actions)
+        greedy_actions = self.greedy_actions(ep_batch, t=t_ep, bs=bs, avail_actions=avail_actions)
         greedy_batch = self.change_actions(batch=ep_batch, actions=greedy_actions, t=t_ep, bs=bs)
-        critic_outputs = self.critic(greedy_batch, t_ep).unsqueeze(0)  # keep bs dimension
+        critic_outputs = self.critic(greedy_batch, t_ep).unsqueeze(0)  # keep bs dimension for action_selector
         return self.action_selector.select_action(critic_outputs[bs], avail_actions, t_env, test_mode=test_mode)
 
     def greedy_actions(self, ep_batch, t=None, bs=slice(None), avail_actions=None, agent_outputs=None):
         """ Returns the actions that are greedy w.r.t. the optional IQL agents' agent_output. """
         avail_actions = ep_batch["avail_actions"][bs, t] if avail_actions is None else avail_actions
         agent_outputs = self.forward(ep_batch, t) if agent_outputs is None else agent_outputs
-        agent_outputs[avail_actions == 0] = -9999999  # From OG deepmarl
+        agent_outputs[avail_actions == 0] = -9999999  # remove unavailable actions
         return agent_outputs.max(dim=len(agent_outputs.shape) - 1, keepdim=True)[1]  # max over last dimension
 
     def change_actions(self, batch, actions: th.Tensor, t=None, bs=None):
