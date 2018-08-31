@@ -15,7 +15,7 @@ class BasicMAC:
 
         self.hidden_states = None
 
-    def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False):
+    def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, **kwargs):
         agent_outputs = self.forward(ep_batch, t_ep)
         # Only select actions for the selected batch elements in bs
         avail_actions = ep_batch["avail_actions"][bs, t_ep]

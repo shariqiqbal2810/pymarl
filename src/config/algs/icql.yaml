@@ -1,0 +1,24 @@
+# --- IQL specific parameters ---
+
+# use epsilon greedy action selector
+action_selector: "epsilon_greedy"
+epsilon_start: 1.0
+epsilon_finish: 0.05
+epsilon_anneal_time: 20000
+
+buffer_size: 500
+
+# update the target network every {} episodes
+target_update_interval: 200
+
+# use the Q_Learner to train
+agent_output_type: "q"
+double_q: True
+mixer: # mixer becomes None
+
+# --- ICQL specific parameters ---
+name: "icql"      # ICQL with IQL agents
+learner: "icql_learner"
+runner: "icql"    # Runner decides randomly which function it uses for sampling
+mac: "icql_mac"   # MAC contains both IQL and the critic functions
+critic_sampling_prob: 0.5  # Probability with which the runner is sampling from the critic
