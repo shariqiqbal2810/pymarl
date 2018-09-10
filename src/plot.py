@@ -3392,14 +3392,15 @@ plot_please = 125
 if plot_please == 125:
     print("Refactored ICQL predator-prey experiment (comaprison with IQL)")
     names = ['wen_pp6x6_riql_100918', 'wen_pp6x6_ricql_0.0_100918', 'wen_pp6x6_ricql_0.2_100918',
-             'wen_pp6x6_ricql_0.5_100918', 'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918']
-    legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.2)', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)']
+             'wen_pp6x6_ricql_0.5_100918', 'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918',
+             'wen_pp6x6_ricql_0.5_detach_100918']
+    legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.2)', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)', 'ICQL (0.5 fix)']
     keys = ['return_mean', 'ep_length_mean']
     single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = None  # 1E6
     min_time = int(0)
-    colors = ['red', 'magenta', 'c', 'blue', 'green', 'black', 'orange']
+    colors = ['red', 'magenta', 'c', 'blue', 'green', 'orange', 'black']
     reward_horizons = [-5, -4, -3, -2, -1, -0.5, 0.0]
     ep_length_horizons = [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))

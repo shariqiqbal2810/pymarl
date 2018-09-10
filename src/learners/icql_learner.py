@@ -84,7 +84,7 @@ class ICQLLearner(QLearner):
 
         # Compute the loss function of the critic and add it to the IQL loss computed above
         critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol
-        critic_td_error = critic_target.detach() - chosen_critic_qvals
+        critic_td_error = chosen_critic_qvals - critic_target.detach()
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()
         loss = loss + critic_loss
 

@@ -36,19 +36,34 @@ class ICQLMAC(BasicMAC):
         # Use either the IQL agents from the BasicMAC for sampling ...
         if not use_critic:
             return BasicMAC.select_actions(self, ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
-        # ... or use the critic conditioned on greedy actions of the IQL agents for sampling
+        # ... or use a local_max approximation on the critic for sampling
         avail_actions = ep_batch["avail_actions"][bs, t_ep]
-        greedy_actions = self.greedy_actions(ep_batch, t=t_ep, bs=bs, avail_actions=avail_actions)
-        greedy_batch = self.change_actions(batch=ep_batch, actions=greedy_actions, t=t_ep, bs=bs)
-        critic_outputs = self.critic(greedy_batch, t=t_ep).unsqueeze(0)  # keep bs dimension for action_selector
-        return self.action_selector.select_action(critic_outputs[bs], avail_actions, t_env, test_mode=test_mode)
+        qvalues, actions = self.local_max(batch=ep_batch, t=t_ep, bs=bs)
+        return self.action_selector.select_action(qvalues[bs], avail_actions, t_env, test_mode=test_mode)
 
-    def greedy_actions(self, ep_batch, t=None, bs=slice(None), avail_actions=None, agent_outputs=None):
-        """ Returns the actions that are greedy w.r.t. the (optional) IQL agents' <agent_output>. """
+    def local_max(self, batch, t, bs):
+        """ Computes an approximation of a local maximisation operator, by iterating between Q-value estimating and
+            per-agent maximisation of that Q-value <args.local_max_iterations> times.
+            Note that <args.local_max_iterations=0> returns IQL Q-values."""
+        qvalues = self.forward(batch, t)
+        actions = self.greedy_actions(batch, t=t, bs=bs, agent_outputs=qvalues)  # , avail_actions=avail_actions)
+        for _ in range(self.args.local_max_iterations):
+            batch = self.change_actions(batch=batch, actions=actions, t=t, bs=bs)
+            qvalues = self.critic(batch, t=t).unsqueeze(0)  # keep bs dimension
+            actions = self.greedy_actions(batch, t=t, bs=bs, agent_outputs=qvalues)
+        return qvalues, actions
+
+    def max_value(self, ep_batch, t=None, bs=slice(None), avail_actions=None, agent_outputs=None):
+        """ Performs a (available-actions corrected) max on the Q-values, either given <agent_outputs>
+            or by computing the IQL Q-values."""
         avail_actions = ep_batch["avail_actions"][bs, t] if avail_actions is None else avail_actions
         agent_outputs = self.forward(ep_batch, t) if agent_outputs is None else agent_outputs
         agent_outputs[avail_actions == 0] = -9999999  # remove unavailable actions
-        return agent_outputs.max(dim=len(agent_outputs.shape)-1, keepdim=True)[1]  # max over last dimension
+        return agent_outputs.max(dim=len(agent_outputs.shape)-1, keepdim=True)  # max over last dimension
+
+    def greedy_actions(self, ep_batch, t=None, bs=slice(None), avail_actions=None, agent_outputs=None):
+        """ Returns the actions that are greedy w.r.t. the (optional) IQL agents' <agent_output>. """
+        return self.max_value(ep_batch, t, bs, avail_actions, agent_outputs)[1]
 
     def change_actions(self, batch, actions: th.Tensor, t=None, bs=None):
         """ Returns a copied EpisodeBatch <batch> with the specified actions at time step <t> and batch slice <bs>. """
