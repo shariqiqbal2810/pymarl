@@ -5,10 +5,10 @@ import torch as th
 
 # noinspection PyUnresolvedReferences
 class ICQLLearner(QLearner):
-    def __init__(self, mac, scheme, logger, args):
-        QLearner.__init__(self, mac, scheme, logger, args)
+    """ Trains ICQL agents, which consist of IQL agents and a central COMA critic of their greedy policy. """
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
+        """ One training step with the given <batch>. """
         # Get the relevant quantities
         rewards = batch["reward"][:, :-1]
         actions = batch["actions"][:, :-1]
@@ -83,7 +83,8 @@ class ICQLLearner(QLearner):
         target_critic_pol = th.gather(target_critic_out, dim=3, index=greedy_actions).squeeze(3)[:, 1:]
 
         # Compute the loss function of the critic and add it to the IQL loss computed above
-        critic_td_error = rewards + self.args.gamma * (1 - terminated) * target_critic_pol - chosen_critic_qvals
+        critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol
+        critic_td_error = critic_target.detach() - chosen_critic_qvals
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()
         loss = loss + critic_loss
 

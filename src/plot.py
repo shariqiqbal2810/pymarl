@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
 import torch
 import numpy as np
+import math
 import pymongo
 from copy import deepcopy
 from time import sleep
@@ -295,6 +296,8 @@ def load_db(keys, name, test=False, max_time=None, fill_in=True, longest_runs=0,
 
 
 def load_refactored_db(keys, name, test=False, max_time=None, fill_in=True, min_time=0, bin_size=200):
+    if len(keys) == 0:
+        return None, None
     min_time_steps = 10
     # Open a mongo DB client
     db_url = "mongodb://pymarlOwner:EMC7Jp98c8rE7FxxN7g82DT5spGsVr9A@gandalf.cs.ox.ac.uk:27017/pymarl"
@@ -408,6 +411,8 @@ def plot_db_compare(names, title=None, legend=None, keys=None, max_time=None, pl
         keys = ["Episode reward", "Episode length"]
     else:
         keys = deepcopy(keys)
+    if len(keys) == 0:
+        return
     if test:
         for i in range(len(keys)):
             if refactored:
@@ -3388,26 +3393,41 @@ if plot_please == 125:
     print("Refactored ICQL predator-prey experiment (comaprison with IQL)")
     names = ['wen_pp6x6_riql_100918', 'wen_pp6x6_ricql_0.0_100918', 'wen_pp6x6_ricql_0.2_100918',
              'wen_pp6x6_ricql_0.5_100918', 'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918']
-    legend = ['IQL', 'ICQL (0.0)', 'ICQL (0.2)', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)']
+    legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.2)', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)']
     keys = ['return_mean', 'ep_length_mean']
+    single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = None  # 1E6
     min_time = int(0)
     colors = ['red', 'magenta', 'c', 'blue', 'green', 'black', 'orange']
-    horizons = [0.0, 0.3, 0.6, 0.8, 0.9, 0.95, 0.975]
-    fig, ax = plt.subplots(len(keys), 2)
-    for t in range(ax.shape[1]):
-        # Plot horizontal helper lines
-        for h in range(len(horizons)):
-            for i in range(len(keys)):
-                if keys[i] == 'NO!Episode reward':
-                    ax[i, t].plot(np.array([0, 1E100]), horizons[h] * np.ones(2), linestyle=':', color='black')
+    reward_horizons = [-5, -4, -3, -2, -1, -0.5, 0.0]
+    ep_length_horizons = [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
+    # Plot keys and their test
+    for t in range(len(keys)):
         # Main plot
-        plot_db_compare(names, legend=names, keys=keys, refactored=True,
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
                         title='4 Pred(3x3) 1 Prey in 6x6 Env.', test=t==1, max_time=max_time,
-                        colors=colors, longest_runs=0, ax=[ax[i, t] for i in range(len(ax))], min_time=min_time,
+                        colors=colors, longest_runs=0, ax=[ax[t, i] for i in range(len(keys))], min_time=min_time,
                         legend_pos=['upper right'], legend_plot=[False, t==1, True, False, False], **kwargs)
-        for i in range(2):
-            y_min, y_max = ax[i, t].get_ylim()
-            #ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            if keys[i] == 'return_mean':
+                for h in range(len(reward_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+            if keys[i] == 'ep_length_mean':
+                for h in range(len(ep_length_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), ep_length_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+        #for i in range(2):
+        #    y_min, y_max = ax[i, t].get_ylim()
+        #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+    # Plot single keys
+    width = math.ceil(len(single_keys) / 2.0)
+    sax = [ax[0, len(keys) + i] for i in range(width)]
+    sax.extend([ax[1, len(keys) + i] for i in range(min(width, len(single_keys) - width))])
+    plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
+                    title='4 Pred(3x3) 1 Prey in 6x6 Env.', test=False, max_time=max_time,
+                    colors=colors, longest_runs=0, ax=sax, min_time=min_time,
+                    legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
