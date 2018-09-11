@@ -1,11 +1,19 @@
 from .q_learner import QLearner
 from components.episode_buffer import EpisodeBatch
+from torch.optim import RMSprop
 import torch as th
 
 
 # noinspection PyUnresolvedReferences
 class ICQLLearner(QLearner):
     """ Trains ICQL agents, which consist of IQL agents and a central COMA critic of their greedy policy. """
+    def __init__(self, mac, scheme, logger, args):
+        QLearner.__init__(self, mac, scheme, logger, args)
+        self.critic_optimiser = None
+        if self.args.separate_critic_optimisation:
+            self.critic_params = list(self.mac.critic.parameters())
+            self.critic_optimiser = RMSprop(params=self.critic_params, lr=args.lr, alpha=args.optim_alpha,
+                                            eps=args.optim_eps)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         """ One training step with the given <batch>. """
@@ -86,7 +94,15 @@ class ICQLLearner(QLearner):
         critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol
         critic_td_error = chosen_critic_qvals - critic_target.detach()
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()
-        loss = loss + critic_loss
+
+        # Either add the loss to the optimiser or optimise it independently
+        if self.critic_optimiser is None:
+            loss = loss + critic_loss
+        else:
+            self.critic_optimiser.zero_grad()
+            critic_loss.backward()
+            th.nn.utils.clip_grad_norm_(self.critic_params, self.args.grad_norm_clip)
+            self.critic_optimiser.step()
 
         # ---------------------------------- Finish (from IQL) ---------------------------------------------------------
 
@@ -102,11 +118,14 @@ class ICQLLearner(QLearner):
 
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             self.logger.log_stat("loss", loss.item(), t_env)
+            self.logger.log_stat("critic_loss", critic_loss.item(), t_env)
             self.logger.log_stat("grad_norm", grad_norm, t_env)
             mask_elems = mask.sum().item()
             self.logger.log_stat("td_error_abs", (masked_td_error.abs().sum().item() / mask_elems), t_env)
             self.logger.log_stat("q_taken_mean",
                                  (chosen_action_qvals * mask).sum().item() / (mask_elems * self.args.n_agents), t_env)
+            self.logger.log_stat("critic_q_taken_mean",
+                                 (chosen_critic_qvals * mask).sum().item() / (mask_elems * self.args.n_agents), t_env)
             self.logger.log_stat("target_mean", (targets * mask).sum().item() / (mask_elems * self.args.n_agents),
                                  t_env)
             self.log_stats_t = t_env

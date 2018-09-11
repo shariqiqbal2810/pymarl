@@ -16,7 +16,10 @@ class ICQLMAC(BasicMAC):
 
     def parameters(self):
         """ Returns a generator of the parameters of this MAC"""
-        return itertools.chain(BasicMAC.parameters(self), self.critic.parameters())
+        params = BasicMAC.parameters(self)
+        if not self.args.separate_critic_optimisation:      # otherwise, critic parameters are handled elsewhere
+            params = itertools.chain(params, self.critic.parameters())
+        return params
 
     def load_state(self, other_mac):
         """ Copies the parameters of another ICQLMAC into this one. """

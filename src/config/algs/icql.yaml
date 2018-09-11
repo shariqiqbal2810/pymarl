@@ -16,10 +16,13 @@ agent_output_type: "q"
 double_q: True
 mixer: # mixer becomes None
 
-# --- ICQL specific parameters ---
+# --- ICQL specific modules ---
 name: "icql"      # ICQL with IQL agents
 learner: "icql_learner"
 runner: "icql"    # Runner decides randomly which function it uses for sampling
 mac: "icql_mac"   # MAC contains both IQL and the critic functions
+
+# --- ICQL specific parameters ---
 critic_sampling_prob: 0.5  # Probability with which the runner is sampling from the critic
 local_max_iterations: 1
+separate_critic_optimisation: True

@@ -3388,19 +3388,24 @@ if plot_please == 124:
     plot_key_vs_key(['HAWAII2_FLOUNDERL_2s3z'], 'Win rate', 'Level2 delegation rate', test=True, fill_in=True,
                     colors=None, ax=None, title=None, legend=None, later_than=0, the_last=2)
 
-plot_please = 125
+#plot_please = 125
 if plot_please == 125:
-    print("Refactored ICQL predator-prey experiment (comaprison with IQL)")
-    names = ['wen_pp6x6_riql_100918', 'wen_pp6x6_ricql_0.0_100918', 'wen_pp6x6_ricql_0.2_100918',
-             'wen_pp6x6_ricql_0.5_100918', 'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918',
-             'wen_pp6x6_ricql_0.5_detach_100918']
-    legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.2)', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)', 'ICQL (0.5 fix)']
+    print("Refactored ICQL 6x6 predator-prey experiment (comaprison with IQL)")
+    names = ['wen_pp6x6_riql_100918', 'wen_pp6x6_ricql_0.0_100918',
+             #'wen_pp6x6_ricql_0.2_100918', 'wen_pp6x6_ricql_0.5_100918',
+             'wen_pp6x6_ricql_0.5_detach_100918',
+             'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918',
+             ]
+    legend = ['IQL (refactor)', 'ICQL (0.0)', #'ICQL (0.2)',
+              'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)', #'ICQL (0.5 fix)'
+              ]
     keys = ['return_mean', 'ep_length_mean']
-    single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = None  # 1E6
     min_time = int(0)
-    colors = ['red', 'magenta', 'c', 'blue', 'green', 'orange', 'black']
+    colors = ['red', 'green', 'blue', 'black', 'orange', 'c', 'magenta',]
     reward_horizons = [-5, -4, -3, -2, -1, -0.5, 0.0]
     ep_length_horizons = [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3409,6 +3414,50 @@ if plot_please == 125:
         # Main plot
         plot_db_compare(names, legend=legend, keys=keys, refactored=True,
                         title='4 Pred(3x3) 1 Prey in 6x6 Env.', test=t==1, max_time=max_time,
+                        colors=colors, longest_runs=0, ax=[ax[t, i] for i in range(len(keys))], min_time=min_time,
+                        legend_pos=['upper right'], legend_plot=[False, t==1, True, False, False], **kwargs)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            if keys[i] == 'return_mean':
+                for h in range(len(reward_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+            if keys[i] == 'ep_length_mean':
+                for h in range(len(ep_length_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), ep_length_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+        #for i in range(2):
+        #    y_min, y_max = ax[i, t].get_ylim()
+        #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+    # Plot single keys
+    width = math.ceil(len(single_keys) / 2.0)
+    sax = [ax[0, len(keys) + i] for i in range(width)]
+    sax.extend([ax[1, len(keys) + i] for i in range(min(width, len(single_keys) - width))])
+    plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
+                    title='4 Pred(3x3) 1 Prey in 6x6 Env.', test=False, max_time=max_time,
+                    colors=colors, longest_runs=0, ax=sax, min_time=min_time,
+                    legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+    plt.show()
+
+plot_please = 126
+if plot_please == 126:
+    print("Refactored ICQL 10x10 predator-prey experiment (comaprison with IQL)")
+    names = ['wen_pp10x10_riql_long_100918', 'wen_pp10x10_ricql_0.0_long_100918', 'wen_pp10x10_ricql_0.5_long_100918']
+    legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.5)']
+    keys = ['return_mean', 'ep_length_mean']
+    #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': ':', 'fill_in': False, 'bin_size': 100}
+    max_time = None  # 1E6
+    min_time = int(0)
+    colors = ['red', 'green', 'blue', 'magenta',  'orange', 'black', 'c']
+    reward_horizons = [-5, -4, -3.5, -3, -2.5, -2]
+    ep_length_horizons = [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
+    # Plot keys and their test
+    for t in range(len(keys)):
+        # Main plot
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 Pred(3x3) 1 Prey in 10x10 Env.', test=t==1, max_time=max_time,
                         colors=colors, longest_runs=0, ax=[ax[t, i] for i in range(len(keys))], min_time=min_time,
                         legend_pos=['upper right'], legend_plot=[False, t==1, True, False, False], **kwargs)
         # Plot horizontal helper lines
