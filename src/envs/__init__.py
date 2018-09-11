@@ -6,6 +6,7 @@ from .predator_prey__old import PredatorPreyEnv as PredatorPreyOldEnv
 from .matrix_game import NormalFormMatrixGame
 from .test import IntegrationTestEnv
 from .multiagentenv import MultiAgentEnv
+from .stag_hunt import StagHunt
 
 
 # TODO: Do we need this?
@@ -22,6 +23,7 @@ REGISTRY["pred_prey"] = partial(env_fn, env=PredatorPreyCapture)
 REGISTRY["matrix_game"] = partial(env_fn, env=NormalFormMatrixGame)
 REGISTRY["integration_test"] = partial(env_fn, env=IntegrationTestEnv)
 REGISTRY["box_push"] = partial(env_fn, env=CoopBoxPushing)
+REGISTRY["stag_hunt"] = partial(env_fn, env=StagHunt)
 
 try:
     from .starcraft1 import StarCraft1Env

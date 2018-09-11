@@ -3441,7 +3441,8 @@ if plot_please == 125:
 plot_please = 126
 if plot_please == 126:
     print("Refactored ICQL 10x10 predator-prey experiment (comaprison with IQL)")
-    names = ['wen_pp10x10_riql_long_100918', 'wen_pp10x10_ricql_0.0_long_100918', 'wen_pp10x10_ricql_0.5_long_100918']
+    #names = ['wen_pp10x10_riql_long_100918', 'wen_pp10x10_ricql_0.0_long_100918', 'wen_pp10x10_ricql_0.5_long_100918']
+    names = ['wen_pp10x10_riql_110918', 'wen_pp10x10_ricql_0.0_110918', 'wen_pp10x10_ricql_0.5_110918']  # separate_critic_update
     legend = ['IQL (refactor)', 'ICQL (0.0)', 'ICQL (0.5)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
