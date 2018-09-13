@@ -52,7 +52,8 @@ class ICQLMAC(BasicMAC):
         actions = self.greedy_actions(batch, t=t, bs=bs, agent_outputs=qvalues)  # , avail_actions=avail_actions)
         for _ in range(self.args.local_max_iterations):
             batch = self.change_actions(batch=batch, actions=actions, t=t, bs=bs)
-            qvalues = self.critic(batch, t=t).unsqueeze(0)  # keep bs dimension
+            qvalues = self.critic(batch, t=t)
+            qvalues = qvalues.view(actions.shape[0], actions.shape[1], qvalues.shape[-1])  # correct the shape
             actions = self.greedy_actions(batch, t=t, bs=bs, agent_outputs=qvalues)
         return qvalues, actions
 
