@@ -17,9 +17,11 @@ class QMixer(nn.Module):
         self.hyper_w_1 = nn.Linear(self.state_dim, self.embed_dim * self.n_agents)
         self.hyper_w_final = nn.Linear(self.state_dim, self.embed_dim)
 
-        # Initialise the hyper-network, such that the result is close to VDN
+        # Initialise the hyper-network of the skip-connections, such that the result is close to VDN
         if self.args.skip_connections:
-            self.skip_connections = nn.Linear(self.state_dim, self.args.n_agents)
+            self.skip_connections = nn.Linear(self.state_dim, self.args.n_agents, bias=False)
+            for params in self.skip_connections.parameters():
+                params.data.fill_(1.0)
 
         # State dependent bias for hidden layer
         self.hyper_b_1 = nn.Linear(self.state_dim, self.embed_dim)
