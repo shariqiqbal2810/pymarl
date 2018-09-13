@@ -3587,15 +3587,17 @@ if plot_please == 129:
              'wen_staghunt_20x20_refactor_coma_reward_120918', 'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918',
              'wen_staghunt_20x20_refactor_icql_reward_130918', 'wen_refactor_vdn_stag_hunt_20x20_reward_130918',
              'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918',
-             'wen_refactor_qmix_stag_hunt_20x20_reward_init_130918']
-    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)', 'ICQL(0.5)', 'VDN', 'QMIX (skip)', 'QMIX (init)']
+             'wen_refactor_qmix_stag_hunt_20x20_reward_init_130918',
+             'wen_refactor_coma_stag_hunt_20x20_reward_csparams_130918']
+    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)', 'ICQL(0.5)',
+              'VDN', 'QMIX (skip)', 'QMIX (init)', 'COMA(params)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = int(0E6)
-    colors = ['red', 'green', 'blue', 'c', 'black', 'magenta', 'orange', 'y']
+    colors = ['red', 'green', 'cyan', 'c', 'black', 'magenta', 'orange', 'y', 'blue']
     reward_horizons = [-10, -5, 0, 5, 10]
     ep_length_horizons = [50, 60, 70, 80, 90, 100]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
