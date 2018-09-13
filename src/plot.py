@@ -3680,3 +3680,22 @@ if plot_please == 130:
                     colors=colors, longest_runs=0, ax=sax, min_time=min_time,
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
+
+#plot_please = 131
+if plot_please == 131:
+    print("Test of COMA on 2s3z.")
+    names = ['wen_refactor_coma_sc2_2s3z_test_130918']
+    legend = ['COMA']
+    #keys = ['return_mean', 'ep_length_mean']
+    keys = ['battle_won_mean', 'return_mean']
+    kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = None
+    min_time = 0  # int(3E6)
+    colors = ['blue', 'red', 'green', 'gray', 'black', 'magenta', 'orange', 'c', 'blue']
+    fig, ax = plt.subplots(len(keys), 2)
+    for t in range(2):
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        test=t==1, max_time=max_time, title="StarCraft II (2s3z)",
+                        colors=colors, longest_runs=0, min_time=min_time, ax=ax[:, t],
+                        legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+    plt.show()
