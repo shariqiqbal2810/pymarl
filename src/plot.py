@@ -359,14 +359,14 @@ def load_refactored_db(keys, name, test=False, max_time=None, fill_in=True, min_
     for e, experiment in enumerate(experiment_list):
         for k in range(len(keys)):
             time_str = keys[k] + "_T"
-            max_time = min_time_found[k]
+            #max_time = min_time_found[k]
             if keys[k] in experiment['info'] and time_str in experiment['info']:
                 eti = experiment['info'][time_str]
                 val = experiment['info'][keys[k]]
                 if isinstance(val[0], float):
                     for t in range(min(len(val), len(eti))):
                         if eti[t] <= times[k][-1] and eti[t] <= max_time_found[k]:
-                            i = int(eti[t] / (max_time+1) * times[k].size)
+                            i = int(eti[t] / (times[k][-1] + 1) * times[k].size)
                             if num[k][e, i] == 0:
                                 res[k][e, i] = val[t]
                             else:
@@ -3488,7 +3488,7 @@ if plot_please == 126:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 127
+#plot_please = 127
 if plot_please == 127:
     print("Refactored 10x10 staghunt experiment (IQL, QMIX, COMA)")
     names = ['wen_staghunt10x10_refactor_iql_110918', 'wen_staghunt10x10_refactor_qmix_110918',
@@ -3497,10 +3497,10 @@ if plot_please == 127:
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
-    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = None  # 1E6
-    min_time = int(3E6)
-    colors = ['red', 'green', 'blue', 'magenta',  'orange', 'black', 'c']
+    kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = None
+    min_time = 0  # int(3E6)
+    colors = ['red', 'green', 'blue', 'magenta', 'c', 'black', 'orange', ]
     reward_horizons = []  # [-5, -4, -3.5, -3, -2.5, -2]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3543,7 +3543,7 @@ if plot_please == 128:
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
-    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': ':', 'fill_in': False, 'bin_size': 100}
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = None  # 1E6
     min_time = int(0E6)
     colors = ['red', 'green', 'blue', 'black', 'magenta',  'orange', 'c']
@@ -3580,21 +3580,22 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 129
+plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918', 'wen_staghunt_20x20_refactor_qmix_reward_120918',
-             'wen_staghunt_20x20_refactor_coma_reward_120918', 'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918']
-    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)']
+             'wen_staghunt_20x20_refactor_coma_reward_120918', 'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918',
+             'wen_staghunt_20x20_refactor_icql_reward_130918', 'wen_refactor_vdn_stag_hunt_20x20_reward_130918']
+    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)', 'ICQL(0.5)', 'VDN']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = None  # 1E6
+    max_time = 1E6
     min_time = int(0E6)
-    colors = ['red', 'green', 'blue', 'black', 'magenta',  'orange', 'c']
-    reward_horizons = []  # [-5, -4, -3.5, -3, -2.5, -2]
-    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    colors = ['red', 'green', 'blue', 'c', 'black', 'magenta',  'orange']
+    reward_horizons = [-10, -5, 0, 5, 10]
+    ep_length_horizons = [50, 60, 70, 80, 90, 100]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
     # Plot keys and their test
     for t in range(len(keys)):
@@ -3626,3 +3627,55 @@ if plot_please == 129:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
+#plot_please = 130
+if plot_please == 130:
+    print("Refactored 10x10 staghunt experiment without time punishment.")
+    names = ['wen_staghunt_10x10_refactor_iql_nopain_130918',
+             'wen_staghunt_10x10_refactor_qmix_nopain_130918',
+             'wen_refactor_icql_stag_hunt_10x10_nopain_mix0.0_130918',
+             'wen_staghunt_10x10_refactor_icql_nopain_130918',
+             'wen_refactor_iql_stag_hunt_10x10_nopain_smallobs_130918',
+             'wen_refactor_qmix_stag_hunt_10x10_nopain_smallobs_130918',
+             'wen_refactor_icql_stag_hunt_10x10_nopain_smallobs_mix0.0_130918',
+             'wen_refactor_icql_stag_hunt_10x10_nopain_smallobs_130918']
+    legend = ['IQL (5x5)', 'QMIX (5x5)', 'ICQL(0.0, 5x5)', 'ICQL(0.5, 5x5)',
+              'IQL (3x3)', 'QMIX (3x3)', 'ICQL(0.0, 3x3)', 'ICQL(0.5, 3x3)']
+    keys = ['return_mean', 'ep_length_mean']
+    #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = None
+    min_time = 0  # int(3E6)
+    colors = ['red', 'green', 'gray', 'black', 'magenta', 'orange', 'c', 'blue']
+    reward_horizons = [5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
+    # Plot keys and their test
+    for t in range(len(keys)):
+        # Main plot
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 agents 1 Stag 1 Hare in 10x10 Env. (no punishment)' if t==0 else None,
+                        test=t==1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=[ax[t, i] for i in range(len(keys))],
+                        legend_pos=['upper right'], legend_plot=[False, t==1, True, False, False], **kwargs)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            if keys[i] == 'return_mean':
+                for h in range(len(reward_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+            if keys[i] == 'ep_length_mean':
+                for h in range(len(ep_length_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), ep_length_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+        #for i in range(2):
+        #    y_min, y_max = ax[i, t].get_ylim()
+        #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+    # Plot single keys
+    width = math.ceil(len(single_keys) / 2.0)
+    sax = [ax[0, len(keys) + i] for i in range(width)]
+    sax.extend([ax[1, len(keys) + i] for i in range(min(width, len(single_keys) - width))])
+    plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
+                    test=False, max_time=max_time,
+                    colors=colors, longest_runs=0, ax=sax, min_time=min_time,
+                    legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+    plt.show()
