@@ -3585,8 +3585,9 @@ if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918', 'wen_staghunt_20x20_refactor_qmix_reward_120918',
              'wen_staghunt_20x20_refactor_coma_reward_120918', 'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918',
-             'wen_staghunt_20x20_refactor_icql_reward_130918', 'wen_refactor_vdn_stag_hunt_20x20_reward_130918']
-    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)', 'ICQL(0.5)', 'VDN']
+             'wen_staghunt_20x20_refactor_icql_reward_130918', 'wen_refactor_vdn_stag_hunt_20x20_reward_130918',
+             'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918']
+    legend = ['IQL', 'QMIX', 'COMA (0-step)', 'COMA (1-step)', 'ICQL(0.5)', 'VDN', 'QMIX (skip)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
