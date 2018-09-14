@@ -295,7 +295,7 @@ def load_db(keys, name, test=False, max_time=None, fill_in=True, longest_runs=0,
     return res, time
 
 
-def load_refactored_db(keys, name, test=False, max_time=None, fill_in=True, min_time=0, bin_size=200):
+def load_refactored_db(keys, name, label=None, test=False, max_time=None, fill_in=True, min_time=0, bin_size=200):
     if len(keys) == 0:
         return None, None
     min_time_steps = 10
@@ -321,7 +321,10 @@ def load_refactored_db(keys, name, test=False, max_time=None, fill_in=True, min_
         name = [name]
     look_for_name = [({'$regex': '^' + name[n] + '.*'} if fill_in else name[n]) for n in range(len(name))]
     for this_name in look_for_name:
-        for experiment in client[db_name]['runs'].find({'config.name': this_name}):
+        search_dict = {'config.name': this_name}
+        if label is not None:
+            search_dict['config.label'] = label
+        for experiment in client[db_name]['runs'].find(search_dict):
             # Filter out invalid experiments
             if all([keys[k] + "_T" in experiment['info'] and len(experiment['info'][keys[k] + "_T"]) >= min_time_steps
                     and experiment['info'][keys[k] + "_T"][-1] >= min_time for k in range(len(keys))]):
@@ -407,14 +410,16 @@ def plot_db_name(name, title=None, plot_individuals=":"):
     plt.show()
 
 
-def plot_db_compare(names, title=None, legend=None, keys=None, max_time=None, plot_individuals=None, pm_std=False,
-                    use_sem=False, test=False, colors=None, ax=None, fill_in=False, longest_runs=0, min_time=0,
-                    legend_pos=None, legend_plot=None, bin_size=200, refactored=False):
+def plot_db_compare(names, labels=None, title=None, legend=None, keys=None, max_time=None, plot_individuals=None,
+                    pm_std=False, use_sem=False, test=False, colors=None, ax=None, fill_in=False, longest_runs=0,
+                    min_time=0, legend_pos=None, legend_plot=None, bin_size=200, refactored=False):
     # Definitions
     if keys is None:
         keys = ["Episode reward", "Episode length"]
     else:
         keys = deepcopy(keys)
+    if labels is None:
+        labels = [None for _ in range(len(names))]
     if len(keys) == 0:
         return
     if test:
@@ -435,8 +440,8 @@ def plot_db_compare(names, title=None, legend=None, keys=None, max_time=None, pl
     max_time_found = [0 for _ in range(len(keys))]
     for i in range(len(names)):
         if refactored:
-            res_i, time_i = load_refactored_db(keys=keys, name=names[i], test=test, max_time=max_time, fill_in=fill_in,
-                                               bin_size=bin_size, min_time=min_time)
+            res_i, time_i = load_refactored_db(keys=keys, name=names[i], label=labels[i], test=test, max_time=max_time,
+                                               fill_in=fill_in, bin_size=bin_size, min_time=min_time)
         else:
             res_i, time_i = load_db(keys=keys, name=names[i], test=test, max_time=max_time, fill_in=fill_in,
                                     longest_runs=longest_runs, bin_size=bin_size, min_time=min_time)
@@ -3580,7 +3585,7 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 129
+#plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
@@ -3588,13 +3593,15 @@ if plot_please == 129:
              #'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918',
              #'wen_refactor_coma_stag_hunt_20x20_reward_csparams_130918',
              #'wen_staghunt_20x20_refactor_icql_reward_130918',
-             'wen_refactor_vdn_stag_hunt_20x20_reward_130918',
+             'wen_refactor_vdn_stag_hunt_20x20_reward_140918',
              'wen_staghunt_20x20_refactor_qmix_reward_120918',
-             'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918',
              'wen_refactor_qmix_stag_hunt_20x20_reward_init_130918',
-             'wen_refactor_qmix_stag_hunt_20x20_reward_initskip_130918']
+             'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918',
+             'wen_refactor_qmix_stag_hunt_20x20_reward_initskip_130918',
+             'wen_refactor_qmix_stag_hunt_20x20_reward_newskip_140918']
     legend = ['IQL', #'COMA (0-step)', 'COMA (1-step)', 'COMA(params)', 'ICQL(0.5)',
-              'VDN', 'QMIX', 'QMIX (skip)', 'QMIX (init)', 'QMIX (new skip)']
+              'VDN', 'QMIX (refactor)', 'QMIX (init, b=1)',
+              'QMIX (skip, w=1, b=0)', 'QMIX (skip, w*1E-4, b=1)', 'QMIX (skip, b=1)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
@@ -3602,7 +3609,7 @@ if plot_please == 129:
     max_time = 1E6
     min_time = int(0E6)
     #colors = ['red', 'cyan', 'c', 'lightblue', 'black', 'magenta', 'green', 'y', 'orange', 'blue']
-    colors = ['red', 'magenta', 'green', 'blue', 'orange', 'black', 'y',  'cyan', 'c', 'lightblue',]
+    colors = ['red', 'magenta', 'green', 'orange', 'blue', 'black', 'c','y',  'cyan',  'lightblue',]
     reward_horizons = [-10, -5, 0, 5, 10]
     ep_length_horizons = [50, 60, 70, 80, 90, 100]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3653,7 +3660,7 @@ if plot_please == 130:
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = None
+    max_time = 1E6
     min_time = 0  # int(3E6)
     colors = ['red', 'green', 'gray', 'black', 'magenta', 'orange', 'c', 'blue']
     reward_horizons = [5, 10]
@@ -3689,21 +3696,29 @@ if plot_please == 130:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 131
+plot_please = 131
 if plot_please == 131:
     print("Test of COMA on 2s3z.")
-    names = ['wen_refactor_coma_sc2_2s3z_test_130918']
-    legend = ['COMA']
+    names = ['wen_refactor_coma_sc2_2s3z_test_130918', 'coma_sc2_2s_3z',
+             'wen_refactor_qmix_sc2_2s3z_skip_connections_140918']
+    labels = [None, 'coma_compare_mackrl', None]
+    legend = ['COMA', 'COMA (greg)', 'QMIX (skip)']
     #keys = ['return_mean', 'ep_length_mean']
     keys = ['battle_won_mean', 'return_mean']
     kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = None
-    min_time = 0  # int(3E6)
+    max_time = 2E6
+    min_time = int(1.9E6)
+    win_horizons = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9, 0.95, 1.0]
     colors = ['blue', 'red', 'green', 'gray', 'black', 'magenta', 'orange', 'c', 'blue']
     fig, ax = plt.subplots(len(keys), 2)
     for t in range(2):
-        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+        plot_db_compare(names, labels=labels, legend=legend, keys=keys, refactored=True,
                         test=t==1, max_time=max_time, title="StarCraft II (2s3z)",
                         colors=colors, longest_runs=0, min_time=min_time, ax=ax[:, t],
-                        legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+                        legend_pos=['lower right'], legend_plot=[False, t==1, False, False], **kwargs)
+        for k in range(len(keys)):
+            if keys[k] == "battle_won_mean":
+                for h in range(len(win_horizons)):
+                    ax[k, t].plot(np.array([0, 1E100]), win_horizons[h] * np.ones(2), linestyle=':', color='black')
+                ax[k, t].set_ylim(-0.05, 1.05)
     plt.show()
