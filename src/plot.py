@@ -3585,7 +3585,7 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 129
+plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
@@ -3696,20 +3696,21 @@ if plot_please == 130:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 131
+#plot_please = 131
 if plot_please == 131:
     print("Test of COMA on 2s3z.")
     names = ['wen_refactor_coma_sc2_2s3z_test_130918', 'coma_sc2_2s_3z',
+             'wen_refactor_qmix_sc2_2s3z_original_140918',
              'wen_refactor_qmix_sc2_2s3z_skip_connections_140918']
-    labels = [None, 'coma_compare_mackrl', None]
-    legend = ['COMA', 'COMA (greg)', 'QMIX (skip)']
+    labels = [None, 'coma_compare_mackrl', None, None]
+    legend = ['COMA', 'COMA (greg)', 'QMIX (refactor)', 'QMIX (skip)']
     #keys = ['return_mean', 'ep_length_mean']
     keys = ['battle_won_mean', 'return_mean']
     kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 2E6
-    min_time = int(1.9E6)
+    min_time = 0  # int(1.9E6)
     win_horizons = [0.0, 0.2, 0.4, 0.6, 0.8, 0.9, 0.95, 1.0]
-    colors = ['blue', 'red', 'green', 'gray', 'black', 'magenta', 'orange', 'c', 'blue']
+    colors = ['blue', 'red', 'green', 'black', 'magenta', 'orange', 'c', 'gray',]
     fig, ax = plt.subplots(len(keys), 2)
     for t in range(2):
         plot_db_compare(names, labels=labels, legend=legend, keys=keys, refactored=True,
