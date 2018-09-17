@@ -5,11 +5,11 @@ env: "stag_hunt"
 env_args:
     agent_obs: [2, 2]
     capture_terminal: True
-    capture_conditions: [0, 1]  # Number of free fields available to [stag, hare] to be captured
+    capture_conditions: [0, 0]  # number of free fields available to stag and hare to be captured
     episode_limit: 100
     intersection_global_view: False
     intersection_unknown: False
-    mountain_slope: 0.0  # Probability that an "up" action will not be executed (vanilla = 0.0)
+    mountain_slope: 0.5 # Probability that an "up" action will not be executed (stag_hunt = 0.0)
     n_agents: 4
     n_hare: 1
     n_stags: 1

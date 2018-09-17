@@ -51,6 +51,10 @@ class StagHunt(MultiAgentEnv):
         if isinstance(args, dict):
             args = convert(args)
 
+        # Add-on for goat-hunts (which like to climb mountains)
+        self.mountain_slope = getattr(args, "mountain_slope", 0.0)
+        self.capture_conditions = getattr(args, "capture_conditions", [0, 1])
+
         # Downwards compatibility of batch_mode
         self.batch_mode = batch_size is not None
         self.batch_size = batch_size if self.batch_mode else 1
@@ -136,10 +140,12 @@ class StagHunt(MultiAgentEnv):
         # Move the agents sequentially in random order
         for b in range(self.batch_size):
             for a in np.random.permutation(self.n_agents):
-                self.agents[a, b, :], collide = self._move_actor(self.agents[a, b, :], actions[a, b], b,
-                                                                 np.asarray([0], dtype=int_type), 0)
-                if collide:
-                    reward[b] = reward[b] + self.collision_reward
+                # Only moves "up" if the mountain permits it (as defined by mountain_slope)
+                if not (np.random.rand() < self.mountain_slope and actions[a, b] == 3):
+                    self.agents[a, b, :], collide = self._move_actor(self.agents[a, b, :], actions[a, b], b,
+                                                                     np.asarray([0], dtype=int_type), 0)
+                    if collide:
+                        reward[b] = reward[b] + self.collision_reward
 
         # Move the prey
         for b in range(self.batch_size):
@@ -152,10 +158,12 @@ class StagHunt(MultiAgentEnv):
                         _, c = self._move_actor(self.prey[p, b, :], u, b, np.asarray([0, 1, 2], dtype=int_type))
                         if not c:
                             possible.append(u)
+                    # Prey is caught when the number of possible moves is less or equal to their capture_condition
+                    captured = len(possible) <= self.capture_conditions[self.prey_type[p, b] - 1]
                     # Stags are caught when they cannot move to any adjacent position
-                    captured = (self.prey_type[p, b] == 1) and (len(possible) <= 0)
+                    #captured = (self.prey_type[p, b] == 1) and (len(possible) <= 0)
                     # Hares play dead when they would have only one position left and are caught
-                    captured = captured or ((self.prey_type[p, b] == 2) and (len(possible) <= 1))
+                    #captured = captured or ((self.prey_type[p, b] == 2) and (len(possible) <= 1))
                     # If the prey is captured, remove it from the grid and terminate episode if specified
                     if captured:
                         self.prey_alive[p, b] = 0
@@ -163,16 +171,22 @@ class StagHunt(MultiAgentEnv):
                         terminated[b] = terminated[b] or self.capture_terminal
                         reward[b] += self.capture_stag_reward if self.prey_type[p, b] == 1 else 0
                         reward[b] += self.capture_hare_reward if self.prey_type[p, b] == 2 else 0
+                        print("Captured %s" % ("stag" if self.prey_type[p, b] == 1 else "hare"))
                     else:
                         # If not, check if the prey can rest and if so determine randomly whether it wants to
                         rest = (self.grid[b, self.prey[p, b, 0], self.prey[p, b, 1], 0] == 0) and \
-                               (np.random.rand() < (self.p_stags_rest if self.prey_type[p] == 1 else self.p_hare_rest))
+                               (np.random.rand() < (self.p_stags_rest if self.prey_type[p, b] == 1 else self.p_hare_rest))
                         # If the prey decides not to rest, choose a movement action randomly
                         if not rest:
                             u = possible[np.random.randint(len(possible))]
-                            self.prey[p, b, :], _ = self._move_actor(self.prey[p, b, :], u, b,
-                                                                     np.asarray([0, 1, 2], dtype=int_type),
-                                                                     self.prey_type[p, b])
+                            # Only moves up/down if the mountain permits it (as defined by mountain_slope)
+                            if not (np.random.rand() < self.mountain_slope
+                                    and self.grid[b, self.prey[p, b, 0], self.prey[p, b, 0], 0] == 0
+                                    and (self.prey_type[p, b] == 2 and u == 3 or self.prey_type[p, b] == 1 and u == 1)):
+                                # Execute movement
+                                self.prey[p, b, :], _ = self._move_actor(self.prey[p, b, :], u, b,
+                                                                         np.asarray([0, 1, 2], dtype=int_type),
+                                                                         self.prey_type[p, b])
             terminated[b] = terminated[b] or sum(self.prey_alive[:, b]) == 0
 
         # Terminate if episode_limit is reached

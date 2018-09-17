@@ -3606,7 +3606,7 @@ if plot_please == 129:
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = 1E6
+    max_time = 5E6
     min_time = int(0E6)
     #colors = ['red', 'cyan', 'c', 'lightblue', 'black', 'magenta', 'green', 'y', 'orange', 'blue']
     colors = ['red', 'magenta', 'green', 'orange', 'blue', 'black', 'c','y',  'cyan',  'lightblue',]
