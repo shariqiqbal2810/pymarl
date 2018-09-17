@@ -3585,7 +3585,7 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 129
+#plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
@@ -3722,4 +3722,55 @@ if plot_please == 131:
                 for h in range(len(win_horizons)):
                     ax[k, t].plot(np.array([0, 1E100]), win_horizons[h] * np.ones(2), linestyle=':', color='black')
                 ax[k, t].set_ylim(-0.05, 1.05)
+    plt.show()
+
+plot_please = 131
+if plot_please == 131:
+    print("Refactored 6x6 goathunt experiment.")
+    names = ['wen_refactor_iql_goat_hunt_6x6_slope0.0_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.25_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.5_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.6_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.7_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.8_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.9_170918']
+    legend = ['p=0.0', 'p=0.25', 'p=0.5', 'p=0.6', 'p=0.7', 'p=0.8', 'p=0.9']
+    keys = ['return_mean', 'ep_length_mean']
+    #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    colors = ['magenta', 'red', 'y', 'green', 'c', 'blue', 'black']
+    reward_horizons = [5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
+    # Plot keys and their test
+    for t in range(len(keys)):
+        # Main plot
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 agents 1 Goat 1 Sheep in 6x6 Env. (IQL, 5x5)' if t==0 else None,
+                        test=t==1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=[ax[t, i] for i in range(len(keys))],
+                        legend_pos=['upper right'], legend_plot=[False, t==1, True, False, False], **kwargs)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            if keys[i] == 'return_mean':
+                for h in range(len(reward_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+            if keys[i] == 'ep_length_mean':
+                for h in range(len(ep_length_horizons)):
+                    ax[t, i].plot(np.array([0, 1E100]), ep_length_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+        #for i in range(2):
+        #    y_min, y_max = ax[i, t].get_ylim()
+        #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+    # Plot single keys
+    width = math.ceil(len(single_keys) / 2.0)
+    sax = [ax[0, len(keys) + i] for i in range(width)]
+    sax.extend([ax[1, len(keys) + i] for i in range(min(width, len(single_keys) - width))])
+    plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
+                    test=False, max_time=max_time,
+                    colors=colors, longest_runs=0, ax=sax, min_time=min_time,
+                    legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
