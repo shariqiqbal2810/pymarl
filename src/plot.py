@@ -3733,15 +3733,16 @@ if plot_please == 131:
              'wen_refactor_iql_goat_hunt_6x6_slope0.6_170918',
              'wen_refactor_iql_goat_hunt_6x6_slope0.7_170918',
              'wen_refactor_iql_goat_hunt_6x6_slope0.8_170918',
-             'wen_refactor_iql_goat_hunt_6x6_slope0.9_170918']
-    legend = ['p=0.0', 'p=0.25', 'p=0.5', 'p=0.6', 'p=0.7', 'p=0.8', 'p=0.9']
+             'wen_refactor_iql_goat_hunt_6x6_slope0.9_170918',
+             'wen_refactor_iql_goat_hunt_6x6_slope0.95_170918']
+    legend = ['p=0.0', 'p=0.25', 'p=0.5', 'p=0.6', 'p=0.7', 'p=0.8', 'p=0.9', 'p=0.95']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 0  # int(3E6)
-    colors = ['magenta', 'red', 'y', 'green', 'c', 'blue', 'black']
+    colors = ['magenta', 'red', 'orange', 'y', 'green', 'c', 'blue', 'black']
     reward_horizons = [5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
