@@ -20,7 +20,7 @@ class ICQLLearner(QLearner):
         td_lambda = self.args.td_lambda
         gamma = self.args.gamma
         # Initialise last lambda-return for not terminated episodes
-        ret = th.zeros(*value.shape)
+        ret = value.clone().fill_(0.0)
         ret[:, -1] = value[:, -1] * (1 - th.sum(terminated, dim=1))
         # Backwards recursive update of the "forward view"
         for t in range(ret.shape[1] - 2, -1, -1):
