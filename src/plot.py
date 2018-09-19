@@ -3834,15 +3834,23 @@ if plot_please == 134:
     print("Refactored 10x10 goathunt experiment.")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.5_nopain_180918',
              'wen_refactor_qmix_goat_hunt_10x10_slope0.5_nopain_180918',
-             'wen_refactor_icql_goat_hunt_10x10_slope0.5_nopain_180918']
-    legend = ['IQL', 'QMIX (skip)', 'ICQL (0.5)']
+             'wen_refactor_icql_goat_hunt_10x10_slope0.5_nopain_180918',
+             'wen_refactor_iql_goat_hunt_10x10_slope0.7_nopain_190918',
+             'wen_refactor_qmix_goat_hunt_10x10_slope0.7_nopain_190918',
+             'wen_refactor_icql_goat_hunt_10x10_slope0.7_nopain_190918',
+             'wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
+             'wen_refactor_qmix_goat_hunt_10x10_slope0.8_nopain_180918',
+             'wen_refactor_icql_goat_hunt_10x10_slope0.8_nopain_180918']
+    legend = ['IQL (p=0.5)', 'QMIX (skip, p=0.5)', 'ICQL (0.5, p=0.5)',
+              'IQL (p=0.7)', 'QMIX (skip, p=0.7)', 'ICQL (0.5, p=0.7)',
+              'IQL (p=0.8)', 'QMIX (skip, p=0.8)', 'ICQL (0.5, p=0.8)']
     keys = ['return_mean', 'ep_length_mean']
     # single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 0  # int(3E6)
-    colors = ['red', 'green', 'blue', 'black', 'orange', 'c', 'magenta', 'y']
+    colors = ['red', 'orange', 'y', 'green', 'c', 'cyan', 'magenta', 'blue', 'black']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3850,7 +3858,7 @@ if plot_please == 134:
     for t in range(len(keys)):
         # Main plot
         plot_db_compare(names, legend=legend, keys=keys, refactored=True,
-                        title='4 agents (5x5) 1 goat 1 sheep' if t == 0 else 'in 10x10 mountain env. (p=0.5, nopain)',
+                        title='4 agents (5x5) 1 goat 1 sheep' if t == 0 else 'in 10x10 mountain env. (nopain)',
                         test=t == 1, max_time=max_time, min_time=min_time,
                         colors=colors, longest_runs=0, ax=[ax[i, t] for i in range(len(keys))],
                         legend_pos=['upper right'], legend_plot=[False, t == 1, True, False, False], **kwargs)

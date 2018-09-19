@@ -15,6 +15,26 @@ class ICQLLearner(QLearner):
             self.critic_optimiser = RMSprop(params=self.critic_params, lr=args.lr, alpha=args.optim_alpha,
                                             eps=args.optim_eps)
 
+    def td_lambda_target(self, reward, value, terminated):
+        # Assumes <reward> in B*T-1*1, <value> in B*T*A and <terminated> in B*T-1*1
+        # Also assumes all Tensors are filled with 0/nan after the episode terminates
+        td_lambda = self.args.td_lambda
+        gamma = self.args.gamma
+        # Create a mask for currently running (i.e. not terminated) episodes
+        mask = 1 - th.sum(terminated, dim=1)
+        # Initialise last lambda-return for currently running episodes
+        ret = th.zeros(*value.shape)
+        ret[:, -1] = value[:, -1] * mask
+        # Backwards recursive update of the "forward view"
+        for t in range(ret.shape[1] - 2, -1, -1):
+            # Update the mask of currently running episodes
+            mask = mask + terminated[:, t]
+            # Recursive update of the lambda-return of running episodes
+            ret[:, t] = td_lambda * gamma * ret[:, t + 1] \
+                        + mask * (reward[:, t] + (1 - td_lambda) * gamma * value[:, t + 1])
+        # Returns lambda-return in B*T-1*A, i.e. from t=0 to t=T-1
+        return ret[:, 0:-1]
+
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         """ One training step with the given <batch>. """
         # Get the relevant quantities
@@ -86,12 +106,15 @@ class ICQLLearner(QLearner):
         greedy_actions = self.mac.greedy_actions(batch, avail_actions=avail_actions, agent_outputs=mac_out)
         greedy_batch = self.mac.change_actions(batch, greedy_actions)
 
-        # Compute the Q-values of the target critic with greedy_actions, but remove the first time-step
+        # Compute the Q-values of the target critic with greedy_actions
         target_critic_out = self.target_mac.critic(greedy_batch).view_as(mac_out)
-        target_critic_pol = th.gather(target_critic_out, dim=3, index=greedy_actions).squeeze(3)[:, 1:]
+        target_critic_pol = th.gather(target_critic_out, dim=3, index=greedy_actions).squeeze(3)
 
         # Compute the loss function of the critic and add it to the IQL loss computed above
-        critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol
+        if self.args.td_lambda == 0.0:
+            critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol[:, 1:]
+        else:
+            critic_target = self.td_lambda_target(rewards, target_critic_pol, terminated)
         critic_td_error = chosen_critic_qvals - critic_target.detach()
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()
 
