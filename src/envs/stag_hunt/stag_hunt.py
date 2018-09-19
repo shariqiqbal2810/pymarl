@@ -171,7 +171,9 @@ class StagHunt(MultiAgentEnv):
                         terminated[b] = terminated[b] or self.capture_terminal
                         reward[b] += self.capture_stag_reward if self.prey_type[p, b] == 1 else 0
                         reward[b] += self.capture_hare_reward if self.prey_type[p, b] == 2 else 0
-                        # print("Captured %s" % ("stag" if self.prey_type[p, b] == 1 else "hare"))
+                        print("Captured %s at height %d and pos %u" % \
+                              (("stag" if self.prey_type[p, b] == 1 else "hare"),
+                               self.env_max[0] - 1 - self.prey[p, b, 0], self.prey[p, b, 1]))
                     else:
                         # If not, check if the prey can rest and if so determine randomly whether it wants to
                         rest = (self.grid[b, self.prey[p, b, 0], self.prey[p, b, 1], 0] == 0) and \
