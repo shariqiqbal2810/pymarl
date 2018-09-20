@@ -3853,7 +3853,7 @@ if plot_please == 134:
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 0  # int(3E6)
-    colors = ['red', 'orange', 'y', 'yellow', 'green', 'c', 'cyan', 'lightblue', 'magenta', 'blue', 'grey', 'black']
+    colors = ['red', 'orange', 'y', 'magenta', 'green', 'c', 'cyan', 'blue', 'brown', 'navy', 'grey', 'black']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
