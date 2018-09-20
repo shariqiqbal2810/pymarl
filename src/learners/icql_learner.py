@@ -16,21 +16,6 @@ class ICQLLearner(QLearner):
             self.critic_optimiser = RMSprop(params=self.critic_params, lr=args.lr, alpha=args.optim_alpha,
                                             eps=args.optim_eps)
 
-    def td_lambda_target(self, reward, value, terminated, mask):
-        # Assumes <reward> in B*T-1*1, <value> in B*T*A, <terminated> in B*T-1*1 and mask in B*T-1*1
-        td_lambda = self.args.td_lambda
-        gamma = self.args.gamma
-        # Initialise last lambda-return for not terminated episodes
-        ret = value.new_zeros(*value.shape)
-        ret[:, -1] = value[:, -1] * (1 - th.sum(terminated, dim=1))
-        # Backwards recursive update of the "forward view"
-        for t in range(ret.shape[1] - 2, -1, -1):
-            next_value = value[:, t + 1] * (1 - terminated[:, t])
-            ret[:, t] = td_lambda * gamma * ret[:, t + 1] \
-                        + mask[:, t] * (reward[:, t] + (1 - td_lambda) * gamma * next_value)
-        # Returns lambda-return from t=0 to t=T-1, i.e. in B*T-1*A
-        return ret[:, 0:-1]
-
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         """ One training step with the given <batch>. """
         # Get the relevant quantities
@@ -110,7 +95,8 @@ class ICQLLearner(QLearner):
         if self.args.td_lambda == 0.0:
             critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol[:, 1:]
         else:
-            critic_target = self.td_lambda_target(rewards, target_critic_pol, terminated, mask)
+            critic_target = build_td_lambda_targets(rewards, terminated, mask, target_critic_pol,
+                                                    self.args.n_agents, self.args.gamma, self.args.td_lambda)
         critic_td_error = chosen_critic_qvals - critic_target.detach()
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()
 
