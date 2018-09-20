@@ -17,7 +17,8 @@ learner: "q_learner"
 double_q: True
 mixer: "qmix"
 mixing_embed_dim: 32
-skip_connections: True
+skip_connections: False
 bias_initialization: False
+hyper_initialization_nonzeros: 6
 
 name: "qmix"

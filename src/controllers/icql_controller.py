@@ -8,11 +8,9 @@ import torch as th
 # noinspection PyUnresolvedReferences
 class ICQLMAC(BasicMAC):
     """ A basic MAC with an additional COMA critic for ICQL. """
-
     def __init__(self, scheme, groups, args):
         BasicMAC.__init__(self, scheme, groups, args)
         self.critic = COMACritic(scheme, args)
-        self.one = th.cuda.FloatTensor(1).fill_(1.0) if args.use_cuda else th.FloatTensor(1).fill_(1.0)
 
     def parameters(self):
         """ Returns a generator of the parameters of this MAC"""
@@ -31,7 +29,6 @@ class ICQLMAC(BasicMAC):
         """ Moves the MAC to the GPU. """
         BasicMAC.cuda(self)
         self.critic.cuda()
-        self.one.cuda()
 
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, use_critic=False, **kwargs):
         """ Returns actions that the MAC selects for the given batch/time-step.
@@ -82,6 +79,6 @@ class ICQLMAC(BasicMAC):
         if 'actions_onehot' in batch.data.transition_data:
             one_hot = batch.data.transition_data['actions_onehot'][bs, t]
             one_hot.fill_(0.0)
-            one_hot.scatter_(dim=len(one_hot.shape)-1, index=actions, src=self.one.expand_as(actions))
+            one_hot.scatter_(dim=len(one_hot.shape)-1, index=actions, src=one_hot.new_ones(1).expand_as(actions))
         # Return the altered batch
         return batch
