@@ -19,6 +19,6 @@ mixer: "qmix"
 mixing_embed_dim: 32
 skip_connections: False
 bias_initialization: False
-hyper_initialization_nonzeros: 6
+hyper_initialization_nonzeros: 0
 
 name: "qmix"

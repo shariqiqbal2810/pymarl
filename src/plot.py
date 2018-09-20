@@ -3598,11 +3598,12 @@ if plot_please == 129:
              #'wen_refactor_qmix_stag_hunt_20x20_reward_init_130918',
              #'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918',
              #'wen_refactor_qmix_stag_hunt_20x20_reward_initskip_130918',
-             'wen_refactor_qmix_stag_hunt_20x20_reward_newskip_140918']
+             'wen_refactor_qmix_stag_hunt_20x20_reward_newskip_140918',
+             'wen_refactor_qmix_stag_hunt_20x20_reward_200918']
     #legend = ['IQL', #'COMA (0-step)', 'COMA (1-step)', 'COMA(params)', 'ICQL(0.5)',
     #          'VDN', 'QMIX (refactor)', 'QMIX (init, b=1)',
     #          'QMIX (skip, w=1, b=0)', 'QMIX (skip, w*1E-4, b=1)', 'QMIX (skip, b=1)']
-    legend = ['IQL', 'COMA', 'VDN', 'QMIX (refactor)', 'QMIX (skip)']
+    legend = ['IQL', 'COMA', 'VDN', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX(j-init)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
@@ -3611,7 +3612,7 @@ if plot_please == 129:
     min_time = int(0E6)
     #colors = ['red', 'cyan', 'c', 'lightblue', 'black', 'magenta', 'green', 'y', 'orange', 'blue']
     #colors = ['red', 'magenta', 'green', 'orange', 'blue', 'black', 'c','y',  'cyan',  'lightblue',]
-    colors = ['green', 'blue', 'black', 'red', 'magenta']
+    colors = ['green', 'blue', 'orange', 'red', 'magenta', 'black']
     reward_horizons = [-10, -5, 0, 5, 10]
     ep_length_horizons = [50, 60, 70, 80, 90, 100]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3703,9 +3704,10 @@ if plot_please == 131:
     print("Test of COMA on 2s3z.")
     names = ['wen_refactor_coma_sc2_2s3z_test_130918', 'coma_sc2_2s_3z',
              'wen_refactor_qmix_sc2_2s3z_original_140918',
-             'wen_refactor_qmix_sc2_2s3z_skip_connections_140918']
+             'wen_refactor_qmix_sc2_2s3z_skip_connections_140918',
+             'wen_refactor_qmix_sc2_2s3z_jakobinit_200918']
     labels = [None, 'coma_compare_mackrl', None, None, None]
-    legend = ['COMA (refactor)', 'COMA (greg)', 'QMIX (refactor)', 'QMIX (skip)']
+    legend = ['COMA (refactor)', 'COMA (greg)', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX (j-init)']
     #keys = ['return_mean', 'ep_length_mean']
     keys = ['battle_won_mean', 'return_mean']
     kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
@@ -3888,7 +3890,7 @@ if plot_please == 134:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 135
+#plot_please = 135
 if plot_please == 135:
     print("Refactored 10x10 goathunt experiment: walls or no walls?")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
@@ -3907,7 +3909,7 @@ if plot_please == 135:
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 0  # int(3E6)
-    colors = ['red', 'orange', 'lime', 'magenta', 'green', 'c', 'blue', 'black', 'navy', 'grey', 'brown']
+    colors = ['orange', 'lime', 'c', 'grey', 'red', 'green', 'blue', 'black', 'navy', 'magenta', 'brown']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
