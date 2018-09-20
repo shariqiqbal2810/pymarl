@@ -160,10 +160,6 @@ class StagHunt(MultiAgentEnv):
                             possible.append(u)
                     # Prey is caught when the number of possible moves is less or equal to their capture_condition
                     captured = len(possible) <= self.capture_conditions[self.prey_type[p, b] - 1]
-                    # Stags are caught when they cannot move to any adjacent position
-                    #captured = (self.prey_type[p, b] == 1) and (len(possible) <= 0)
-                    # Hares play dead when they would have only one position left and are caught
-                    #captured = captured or ((self.prey_type[p, b] == 2) and (len(possible) <= 1))
                     # If the prey is captured, remove it from the grid and terminate episode if specified
                     if captured:
                         self.prey_alive[p, b] = 0
