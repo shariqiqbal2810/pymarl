@@ -3603,12 +3603,12 @@ if plot_please == 129:
     #legend = ['IQL', #'COMA (0-step)', 'COMA (1-step)', 'COMA(params)', 'ICQL(0.5)',
     #          'VDN', 'QMIX (refactor)', 'QMIX (init, b=1)',
     #          'QMIX (skip, w=1, b=0)', 'QMIX (skip, w*1E-4, b=1)', 'QMIX (skip, b=1)']
-    legend = ['IQL', 'COMA', 'VDN', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX(j-init)']
+    legend = ['IQL', 'COMA', 'VDN', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX(nz=6)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = 5E6
+    max_time = 1E6  # 5E6
     min_time = int(0E6)
     #colors = ['red', 'cyan', 'c', 'lightblue', 'black', 'magenta', 'green', 'y', 'orange', 'blue']
     #colors = ['red', 'magenta', 'green', 'orange', 'blue', 'black', 'c','y',  'cyan',  'lightblue',]
@@ -3701,13 +3701,13 @@ if plot_please == 130:
 
 #plot_please = 131
 if plot_please == 131:
-    print("Test of COMA on 2s3z.")
+    print("Test of COMA and QMIX on 2s3z.")
     names = ['wen_refactor_coma_sc2_2s3z_test_130918', 'coma_sc2_2s_3z',
              'wen_refactor_qmix_sc2_2s3z_original_140918',
              'wen_refactor_qmix_sc2_2s3z_skip_connections_140918',
              'wen_refactor_qmix_sc2_2s3z_jakobinit_200918']
     labels = [None, 'coma_compare_mackrl', None, None, None]
-    legend = ['COMA (refactor)', 'COMA (greg)', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX (j-init)']
+    legend = ['COMA (refactor)', 'COMA (greg)', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX (nz=65)']
     #keys = ['return_mean', 'ep_length_mean']
     keys = ['battle_won_mean', 'return_mean']
     kwargs = {'pm_std': False, 'use_sem': False, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
@@ -3890,9 +3890,9 @@ if plot_please == 134:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 135
+plot_please = 135
 if plot_please == 135:
-    print("Refactored 10x10 goathunt experiment: walls or no walls?")
+    print("Refactored 10x10 goathunt experiment: walls or no walls? Answer: NO WALLS!")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
              'wen_refactor_qmix_goat_hunt_10x10_slope0.8_nopain_180918',
              'wen_refactor_icql_goat_hunt_10x10_slope0.8_nopain_180918',

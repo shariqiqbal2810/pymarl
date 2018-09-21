@@ -15,15 +15,21 @@ class COMACritic(nn.Module):
         self.output_type = "q"
 
         # Set up network layers
-        self.fc1 = nn.Linear(input_shape, 64)
+        self.fc1 = nn.Linear(input_shape, args.critic_hidden_size)
 
         if args.recurrent_critic:
-            self.rnn = nn.GRU(64, 64, batch_first=True)
+            self.rnn = nn.GRU(args.critic_hidden_size, args.critic_hidden_size, batch_first=True)
         else:
             self.rnn = None
 
         # self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, self.n_actions)
+        self.fc3 = nn.Linear(args.critic_hidden_size, self.n_actions)
+
+        # initialize weights according to the number of non-zero entries in the state, if specified
+        if args.critic_initialization_nonzeros:
+            std = self.args.critic_initialization_nonzeros ** -0.5
+            self.fc1.weight.data.normal_(std=std)
+            self.fc1.bias.data.normal_(std=std)
 
     def forward(self, batch, t=None):
         inputs = self._build_inputs(batch, t=t)
