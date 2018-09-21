@@ -23,7 +23,13 @@ runner: "icql"    # Runner decides randomly which function it uses for sampling
 mac: "icql_mac"   # MAC contains both IQL and the critic functions
 
 # --- ICQL specific parameters ---
+critic_hidden_size: 64
+critic_initialization_nonzeros: 0
 critic_sampling_prob: 0.5  # Probability with which the runner is sampling from the critic
 local_max_iterations: 1
 separate_critic_optimisation: True
 td_lambda: 0.8
+visit_alpha: 0.9998
+visit_beta: 0.9998
+visit_bias: 0.0
+visit_reward: 0.0

@@ -28,11 +28,18 @@ class ICQLLearner(QLearner):
 
         # Calculate estimated Q-Values
         mac_out = []
+        mac_hidden = []
         self.mac.init_hidden(batch.batch_size)
         for t in range(batch.max_seq_length):
+            # Compute agent output
             agent_outs = self.mac.forward(batch, t=t)
             mac_out.append(agent_outs)
-        mac_out = th.stack(mac_out, dim=1)  # Concat over time
+            # Remember the agents' hidden states
+            hidden_shape = self.mac.hidden_states.shape
+            mac_hidden.append(self.mac.hidden_states.view(hidden_shape[0] // self.args.n_agents, -1, hidden_shape[1]))
+        # Concat both over time
+        mac_out = th.stack(mac_out, dim=1)
+        mac_hidden = th.stack(mac_hidden, dim=1)
 
         # Pick the Q-Values for the actions taken by each agent
         chosen_action_qvals = th.gather(mac_out[:, :-1], dim=3, index=actions).squeeze(3)  # Remove the last dim
@@ -91,10 +98,16 @@ class ICQLLearner(QLearner):
         target_critic_out = self.target_mac.critic(greedy_batch).view_as(mac_out)
         target_critic_pol = th.gather(target_critic_out, dim=3, index=greedy_actions).squeeze(3)
 
+        # Compute potential intrinsic reward
+        if self.args.visit_reward > 0:
+            rewards += self.mac.intrinsic_agents.reward(mac_hidden[:, 1:])
+
         # Compute the loss function of the critic and add it to the IQL loss computed above
         if self.args.td_lambda == 0.0:
+            # This is the technically correct 1-step TD(0)-return
             critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol[:, 1:]
         else:
+            # But to propagate intrinsic rewards we may want to use a TD(lambda)-return instead
             critic_target = build_td_lambda_targets(rewards, terminated, mask, target_critic_pol,
                                                     self.args.n_agents, self.args.gamma, self.args.td_lambda)
         critic_td_error = chosen_critic_qvals - critic_target.detach()

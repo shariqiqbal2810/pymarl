@@ -3,7 +3,7 @@ from modules.critics.coma import COMACritic
 import itertools
 from copy import deepcopy
 import torch as th
-
+from components.intrinsic_rewards import LinearVarianceReward
 
 # noinspection PyUnresolvedReferences
 class ICQLMAC(BasicMAC):
@@ -11,6 +11,9 @@ class ICQLMAC(BasicMAC):
     def __init__(self, scheme, groups, args):
         BasicMAC.__init__(self, scheme, groups, args)
         self.critic = COMACritic(scheme, args)
+        # Possible intrinsic rewards: either for the agents or the critic
+        self.intrinsic_agents = LinearVarianceReward(args)
+        self.intrinsic_critic = LinearVarianceReward(args)
 
     def parameters(self):
         """ Returns a generator of the parameters of this MAC"""
@@ -29,17 +32,28 @@ class ICQLMAC(BasicMAC):
         """ Moves the MAC to the GPU. """
         BasicMAC.cuda(self)
         self.critic.cuda()
+        self.intrinsic_agents.cuda()
+        self.intrinsic_critic.cuda()
+
+    def observe_batch(self, batch):
+        pass
 
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, use_critic=False, **kwargs):
         """ Returns actions that the MAC selects for the given batch/time-step.
             <use_critic> determines whether the Q-values of the critic (True) or the IQL agents (False) are used. """
-        # Use either the IQL agents from the BasicMAC for sampling ...
         if not use_critic:
-            return BasicMAC.select_actions(self, ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
-        # ... or use a local_max approximation on the critic for sampling
-        avail_actions = ep_batch["avail_actions"][bs, t_ep]
-        qvalues, actions = self.local_max(batch=ep_batch, t=t_ep, bs=bs)
-        return self.action_selector.select_action(qvalues[bs], avail_actions, t_env, test_mode=test_mode)
+            # Use either the IQL agents from the BasicMAC for sampling ...
+            chosen_actions = BasicMAC.select_actions(self, ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
+        else:
+            # ... or use a local_max approximation on the critic for sampling
+            avail_actions = ep_batch["avail_actions"][bs, t_ep]
+            qvalues, actions = self.local_max(batch=ep_batch, t=t_ep, bs=bs)
+            chosen_actions = self.action_selector.select_action(qvalues[bs], avail_actions, t_env, test_mode=test_mode)
+        # Let the intrinsic reward modules observe the sampled hidden states
+        if self.args.visit_reward != 0:
+            self.intrinsic_agents.observe(self.hidden_states)
+        # Return the chosen actions
+        return chosen_actions
 
     def local_max(self, batch, t, bs):
         """ Computes an approximation of a local maximisation operator, by iterating between Q-value estimating and

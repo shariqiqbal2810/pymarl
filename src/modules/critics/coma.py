@@ -25,7 +25,7 @@ class COMACritic(nn.Module):
         # self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(args.critic_hidden_size, self.n_actions)
 
-        # initialize weights according to the number of non-zero entries in the state, if specified
+        # initialize input weights according to the number of non-zero entries in the state, if specified
         if args.critic_initialization_nonzeros:
             std = self.args.critic_initialization_nonzeros ** -0.5
             self.fc1.weight.data.normal_(std=std)

@@ -3585,11 +3585,10 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 129
+plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
-             'wen_staghunt_20x20_refactor_coma_reward_120918',
              #'wen_staghunt_20x20_refactor_coma_nstep1_reward_120918',
              #'wen_refactor_coma_stag_hunt_20x20_reward_csparams_130918',
              #'wen_staghunt_20x20_refactor_icql_reward_130918',
@@ -3599,11 +3598,15 @@ if plot_please == 129:
              #'wen_refactor_qmix_stag_hunt_20x20_reward_skip_130918',
              #'wen_refactor_qmix_stag_hunt_20x20_reward_initskip_130918',
              'wen_refactor_qmix_stag_hunt_20x20_reward_newskip_140918',
-             'wen_refactor_qmix_stag_hunt_20x20_reward_200918']
+             'wen_refactor_qmix_stag_hunt_20x20_reward_200918',
+             'wen_staghunt_20x20_refactor_coma_reward_120918',
+             'wen_refactor_coma_stag_hunt_20x20_reward_nzinit0_210918',
+             'wen_refactor_coma_stag_hunt_20x20_reward_nzinit12_210918']
     #legend = ['IQL', #'COMA (0-step)', 'COMA (1-step)', 'COMA(params)', 'ICQL(0.5)',
     #          'VDN', 'QMIX (refactor)', 'QMIX (init, b=1)',
     #          'QMIX (skip, w=1, b=0)', 'QMIX (skip, w*1E-4, b=1)', 'QMIX (skip, b=1)']
-    legend = ['IQL', 'COMA', 'VDN', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX(nz=6)']
+    legend = ['IQL', 'VDN', 'QMIX (refactor)', 'QMIX (skip)', 'QMIX(nz=6)',
+              'COMA (refactor)', 'COMA (nz=0)', 'COMA (nz=12)']
     keys = ['return_mean', 'ep_length_mean']
     #single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     single_keys = []
@@ -3612,7 +3615,7 @@ if plot_please == 129:
     min_time = int(0E6)
     #colors = ['red', 'cyan', 'c', 'lightblue', 'black', 'magenta', 'green', 'y', 'orange', 'blue']
     #colors = ['red', 'magenta', 'green', 'orange', 'blue', 'black', 'c','y',  'cyan',  'lightblue',]
-    colors = ['green', 'blue', 'orange', 'red', 'magenta', 'black']
+    colors = ['magenta', 'orange', 'red', 'green','lime', 'c', 'blue', 'black']
     reward_horizons = [-10, -5, 0, 5, 10]
     ep_length_horizons = [50, 60, 70, 80, 90, 100]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
@@ -3890,7 +3893,7 @@ if plot_please == 134:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 135
+#plot_please = 135
 if plot_please == 135:
     print("Refactored 10x10 goathunt experiment: walls or no walls? Answer: NO WALLS!")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
