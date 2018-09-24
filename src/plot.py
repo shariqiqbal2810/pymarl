@@ -3954,7 +3954,8 @@ if plot_please == 136:
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore1.0_bias0.0_alpha0.9998_beta1_240918',
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.0_alpha0.9998_beta1_240918',
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.0_alpha0.9998_beta1_240918',
-             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.05_alpha0.9998_beta1_240918']
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.05_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.5_alpha0.9998_beta1_240918']
     legend = ['ICQL (0.5, ir=0)', 'ICQL (0.5, ir=1)', 'ICQL (0.5, ir=10)', 'ICQL (0.5, ir=100)',
               'ICQL (0.5, ir=10, ib=0.05)']
     keys = ['return_mean', 'ep_length_mean']

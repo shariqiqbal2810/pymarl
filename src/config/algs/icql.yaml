@@ -32,4 +32,5 @@ td_lambda: 0.8
 visit_alpha: 0.9998
 visit_beta: 1  # 0.9998
 visit_bias: 0.0
+visit_use_std: True
 visit_reward: 10.0
