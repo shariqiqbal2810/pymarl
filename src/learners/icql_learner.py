@@ -99,17 +99,17 @@ class ICQLLearner(QLearner):
         target_critic_pol = th.gather(target_critic_out, dim=3, index=greedy_actions).squeeze(3)
 
         # Compute potential intrinsic reward
+        intrinsic_rewards = 0
         if self.args.visit_reward > 0:
             intrinsic_rewards = self.mac.intrinsic_agents.reward(mac_hidden[:, 1:])
-            rewards += intrinsic_rewards
 
         # Compute the loss function of the critic and add it to the IQL loss computed above
         if self.args.td_lambda == 0.0:
             # This is the technically correct 1-step TD(0)-return
-            critic_target = rewards + self.args.gamma * (1 - terminated) * target_critic_pol[:, 1:]
+            critic_target = rewards + intrinsic_rewards + self.args.gamma * (1 - terminated) * target_critic_pol[:, 1:]
         else:
             # But to propagate intrinsic rewards we may want to use a TD(lambda)-return instead
-            critic_target = build_td_lambda_targets(rewards, terminated, mask, target_critic_pol,
+            critic_target = build_td_lambda_targets(rewards + intrinsic_rewards, terminated, mask, target_critic_pol,
                                                     self.args.n_agents, self.args.gamma, self.args.td_lambda)
         critic_td_error = chosen_critic_qvals - critic_target.detach()
         critic_loss = ((critic_td_error * mask) ** 2).sum() / mask.sum()

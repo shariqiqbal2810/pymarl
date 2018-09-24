@@ -298,7 +298,7 @@ def load_db(keys, name, test=False, max_time=None, fill_in=True, longest_runs=0,
 def load_refactored_db(keys, name, label=None, test=False, max_time=None, fill_in=True, min_time=0, bin_size=200):
     if len(keys) == 0:
         return None, None
-    min_time_steps = 10
+    min_time_steps = 4
     # Open a mongo DB client
     db_url = "mongodb://pymarlOwner:EMC7Jp98c8rE7FxxN7g82DT5spGsVr9A@gandalf.cs.ox.ac.uk:27017/pymarl"
     db_name = "pymarl"
@@ -3955,16 +3955,17 @@ if plot_please == 136:
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.0_alpha0.9998_beta1_240918',
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.0_alpha0.9998_beta1_240918',
              'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.05_alpha0.9998_beta1_240918',
-             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.5_alpha0.9998_beta1_240918']
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.5_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.25_alpha0.9998_beta1_var_240918']
     legend = ['ICQL (0.5, ir=0)', 'ICQL (0.5, ir=1)', 'ICQL (0.5, ir=10)', 'ICQL (0.5, ir=100)',
-              'ICQL (0.5, ir=10, ib=0.05)']
+              'ICQL (0.5, ir=10, ib=0.05)', 'ICQL (0.5, ir=10, ib=0.5, std)', 'ICQL (0.5, ir=10, ib=0.25, var)']
     keys = ['return_mean', 'ep_length_mean']
     single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
     # single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 2E6
     min_time = 0  # int(3E6)
-    colors = ['red', 'green', 'blue', 'black', 'magenta', 'brown', 'orange', 'lime', 'c', 'grey', 'navy']
+    colors = ['red', 'green', 'blue', 'black', 'magenta', 'orange', 'lime', 'c', 'grey', 'navy', 'brown']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
