@@ -3834,7 +3834,7 @@ if plot_please == 133:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 134
+#plot_please = 134
 if plot_please == 134:
     print("Refactored 10x10 goathunt experiment.")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.5_nopain_180918',
@@ -3913,6 +3913,57 @@ if plot_please == 135:
     max_time = 1E6
     min_time = 0  # int(3E6)
     colors = ['orange', 'lime', 'c', 'grey', 'red', 'green', 'blue', 'black', 'navy', 'magenta', 'brown']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
+    # Plot keys and their test
+    for t in range(len(keys)):
+        # Main plot
+        plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 agents (5x5) 1 goat 1 sheep' if t == 0 else 'in 10x10 mountain env. (p=0.8, nopain)',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=[ax[i, t] for i in range(len(keys))],
+                        legend_pos=['upper right'], legend_plot=[False, t == 1, True, False, False], **kwargs)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            if keys[i] == 'return_mean':
+                for h in range(len(reward_horizons)):
+                    ax[i, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+            if keys[i] == 'ep_length_mean':
+                for h in range(len(ep_length_horizons)):
+                    ax[i, t].plot(np.array([0, 1E100]), ep_length_horizons[h] * np.ones(2), linestyle=':',
+                                  color='black')
+        # for i in range(2):
+        #    y_min, y_max = ax[i, t].get_ylim()
+        #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
+    # Plot single keys
+    width = math.ceil(len(single_keys) / 2.0)
+    sax = [ax[len(keys) + i, 0] for i in range(width)]
+    sax.extend([ax[len(keys) + i, 1] for i in range(min(width, len(single_keys) - width))])
+    plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
+                    test=False, max_time=max_time,
+                    colors=colors, longest_runs=0, ax=sax, min_time=min_time,
+                    legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+    plt.show()
+
+plot_please = 136
+if plot_please == 136:
+    print("Refactored 10x10 goathunt experiment with agent-centric intrinsic exploration.")
+    names = ['wen_refactor_icql_goat_hunt_10x10_slope0.8_nopain_tdlam0.8_190918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore1.0_bias0.0_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.0_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.0_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.05_alpha0.9998_beta1_240918']
+    legend = ['ICQL (0.5, ir=0)', 'ICQL (0.5, ir=1)', 'ICQL (0.5, ir=10)', 'ICQL (0.5, ir=100)',
+              'ICQL (0.5, ir=10, ib=0.05)']
+    keys = ['return_mean', 'ep_length_mean']
+    # single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 2E6
+    min_time = 0  # int(3E6)
+    colors = ['red', 'green', 'blue', 'black', 'magenta', 'brown', 'orange', 'lime', 'c', 'grey', 'navy']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(2, int(len(keys) + math.ceil(len(single_keys) / 2.0)))
