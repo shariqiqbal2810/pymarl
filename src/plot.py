@@ -3585,7 +3585,7 @@ if plot_please == 128:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 129
+#plot_please = 129
 if plot_please == 129:
     print("Refactored 20x20 staghunt experiment with more reward (IQL, QMIX, COMA)")
     names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
@@ -3834,7 +3834,7 @@ if plot_please == 133:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-#plot_please = 134
+plot_please = 134
 if plot_please == 134:
     print("Refactored 10x10 goathunt experiment.")
     names = ['wen_refactor_iql_goat_hunt_10x10_slope0.5_nopain_180918',

@@ -15,7 +15,7 @@ env_args:
     n_stags: 1
     observe_walls: False
     observe_ids: False
-    observe_one_hot: True
+    observe_one_hot: False
     p_stags_rest: 0.0
     p_hare_rest: 0.0
     reward_hare: 5
