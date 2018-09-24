@@ -11,6 +11,7 @@ class LinearVarianceReward:
         self.bias = args.visit_bias
         self.scale = args.visit_reward
         self.normalize = True
+        self.use_std = True
         # Observation counter
         self.num_observations = 0
         # Matrices (not initialized yet)
@@ -66,10 +67,17 @@ class LinearVarianceReward:
             v, bs = shape[-1], reduce(lambda x, y: x * y, shape[0:-1], 1)
             obs = obs.clone().detach().resize_(bs, v)
             # Compute the approximate "posterior standard deviation" for all observations
-            uncertainty = th.sqrt(th.sum(th.mm(obs, self.inverse) * obs, dim=1)).view(shape[:-1])
+            uncertainty = th.sum(th.mm(obs, self.inverse) * obs, dim=1).view(shape[:-1])
+            # The uncertainty is either proportional to the standard deviation (use_std) or the variance
+            if self.use_std:
+                uncertainty = th.sqrt(uncertainty)
             # We are only interested in the largest uncertainty
             uncertainty, _ = th.min(uncertainty, dim=-1, keepdim=True)
-        return self.scale * (uncertainty - self.bias)
+        # The intrinsic reward is a scaled, biased version of the computed uncertainty
+        intrinsic = self.scale * (uncertainty - self.bias)
+        # If we get any NaN's there will be no intrinsic reward.
+        intrinsic[intrinsic != intrinsic].fill_(0.0)
+        return intrinsic
 
     def cuda(self):
         if self.correlation is not None:

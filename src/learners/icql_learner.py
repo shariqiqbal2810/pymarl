@@ -100,7 +100,8 @@ class ICQLLearner(QLearner):
 
         # Compute potential intrinsic reward
         if self.args.visit_reward > 0:
-            rewards += self.mac.intrinsic_agents.reward(mac_hidden[:, 1:])
+            intrinsic_rewards = self.mac.intrinsic_agents.reward(mac_hidden[:, 1:])
+            rewards += intrinsic_rewards
 
         # Compute the loss function of the critic and add it to the IQL loss computed above
         if self.args.td_lambda == 0.0:
@@ -137,6 +138,7 @@ class ICQLLearner(QLearner):
         if t_env - self.log_stats_t >= self.args.learner_log_interval:
             self.logger.log_stat("loss", loss.item(), t_env)
             self.logger.log_stat("critic_loss", critic_loss.item(), t_env)
+            self.logger.log_stat("intrinsic_reward", intrinsic_rewards.mean().item(), t_env)
             self.logger.log_stat("grad_norm", grad_norm, t_env)
             mask_elems = mask.sum().item()
             self.logger.log_stat("td_error_abs", (masked_td_error.abs().sum().item() / mask_elems), t_env)

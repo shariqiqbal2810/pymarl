@@ -3958,8 +3958,8 @@ if plot_please == 136:
     legend = ['ICQL (0.5, ir=0)', 'ICQL (0.5, ir=1)', 'ICQL (0.5, ir=10)', 'ICQL (0.5, ir=100)',
               'ICQL (0.5, ir=10, ib=0.05)']
     keys = ['return_mean', 'ep_length_mean']
-    # single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
-    single_keys = []
+    single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    # single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 2E6
     min_time = 0  # int(3E6)
@@ -3989,9 +3989,9 @@ if plot_please == 136:
         #    y_min, y_max = ax[i, t].get_ylim()
         #    ax[i, t].set_ylim(y_min - (y_max - y_min) / 1.0, y_max)
     # Plot single keys
-    width = math.ceil(len(single_keys) / 2.0)
-    sax = [ax[len(keys) + i, 0] for i in range(width)]
-    sax.extend([ax[len(keys) + i, 1] for i in range(min(width, len(single_keys) - width))])
+    width = int(math.ceil(len(single_keys) / 2.0))
+    sax = [ax[0, len(keys) + i] for i in range(width)]
+    sax.extend([ax[1, len(keys) + i] for i in range(min(width, len(single_keys) - width))])
     plot_db_compare(names, legend=legend, keys=single_keys, refactored=True,
                     test=False, max_time=max_time,
                     colors=colors, longest_runs=0, ax=sax, min_time=min_time,
