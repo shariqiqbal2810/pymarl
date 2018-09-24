@@ -10,7 +10,7 @@ class LinearVarianceReward:
         self.beta = args.visit_beta
         self.bias = args.visit_bias
         self.scale = args.visit_reward
-        self.normalize = False
+        self.normalize = True
         # Observation counter
         self.num_observations = 0
         # Matrices (not initialized yet)
@@ -26,26 +26,37 @@ class LinearVarianceReward:
             obs /= th.norm(obs, p=2, dim=0, keepdim=True)
         # Initialize correlation matrix not defined, initialize with small eye
         if self.num_observations == 0:
-            initialize_value = 1E-1
+            initialize_value = 1E-2
             self.correlation = th.eye(v) * initialize_value
             if obs.is_cuda:
                 self.correlation = self.correlation.cuda()
         # Update correlation matrix
-        self.correlation *= self.alpha * self.correlation
+        self.correlation *= self.alpha
         self.correlation += self.beta * th.mm(obs.t(), obs)
         # Update inverse correlation matrix
-        if self.num_observations % 100 == 0:
+        # if self.num_observations % 100 == 0:
             # Regularly invert the matrix, e.g. if correlation matrix has just been created
-            self.inverse = th.inverse(self.correlation)
-        else:
+            # self.inverse = th.inverse(self.correlation)
+        # else:
+            # NOTE: the following code produced NaNs and we chose to invert the matrix only now and then (above)
             # Update the inverted matrix otherwise using the matrix inversion lemma
-            obs_inv = th.mm(obs, self.inverse)
-            reg_mat = th.mm(obs_inv, obs.t())
-            reg_mat += self.alpha / self.beta * th.diag(obs.new_ones(bs))
-            self.inverse -= th.mm(obs_inv.t(), th.mm(th.inverse(reg_mat), obs_inv))
-            self.inverse /= self.alpha
-        # Increase observation counter by number of given observations <bs>
-        self.num_observations += bs
+            # obs_inv = th.mm(obs, self.inverse)
+            # reg_mat = th.mm(obs_inv, obs.t())
+            # reg_mat += self.alpha / self.beta * th.diag(obs.new_ones(bs))
+            # self.inverse -= th.mm(obs_inv.t(), th.mm(th.inverse(reg_mat), obs_inv))
+            # self.inverse /= self.alpha
+        # Increase observation counter by 1 (or better number of given observations <bs>?)
+        # if th.sum(self.inverse != self.inverse):
+        #     a = self.inverse != self.inverse
+        self.num_observations += 1  # bs
+
+    def compute(self, test_mode=False):
+        """ Does the costly background computation of the class. Is meant to be called after each trajectory. """
+        if not test_mode and self.correlation is not None:
+            self.inverse = th.inverse(self.correlation)
+            # DEBUG
+            if th.sum(self.inverse != self.inverse) > 0:
+                a = self.inverse != self.inverse
 
     def reward(self, obs: th.Tensor):
         uncertainty = 0.0

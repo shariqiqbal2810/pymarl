@@ -38,6 +38,10 @@ class ICQLMAC(BasicMAC):
     def observe_batch(self, batch):
         pass
 
+    def post_episode(self, batch, test_mode=False):
+        """ Is meant to perform any kind of processing triggered after the end of an episode. """
+        self.intrinsic_agents.compute(test_mode)
+
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, use_critic=False, **kwargs):
         """ Returns actions that the MAC selects for the given batch/time-step.
             <use_critic> determines whether the Q-values of the critic (True) or the IQL agents (False) are used. """
