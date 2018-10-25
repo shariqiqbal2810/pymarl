@@ -25,15 +25,10 @@ class QMixer(nn.Module):
             self.hyper_w_final.weight.data.normal_(std=std)
             self.hyper_w_final.bias.data.normal_(std=std)
 
-        # Initialise the hyper networks, such that they return something close to 1
-        if self.args.bias_initialization:
-            self.hyper_w_1.bias.data.fill_(1.0)
-            self.hyper_w_final.bias.data.fill_(1.0)
-
         # Initialise the hyper-network of the skip-connections, such that the result is close to VDN
         if self.args.skip_connections:
             self.skip_connections = nn.Linear(self.state_dim, self.args.n_agents, bias=True)
-            self.skip_connections.bias.data.fill_(1.0)      # bias produces initial VDN weights
+            self.skip_connections.bias.data.fill_(1.0)  # bias produces initial VDN weights
 
         # State dependent bias for hidden layer
         self.hyper_b_1 = nn.Linear(self.state_dim, self.embed_dim)
@@ -58,7 +53,7 @@ class QMixer(nn.Module):
         w_final = w_final.view(-1, self.embed_dim, 1)
         # State-dependent bias
         v = self.V(states).view(-1, 1, 1)
-        # Compute the output of potential skip connections
+        # Skip connections
         s = 0
         if self.args.skip_connections:
             ws = th.abs(self.skip_connections(states)).view(-1, self.n_agents, 1)

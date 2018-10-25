@@ -6,8 +6,7 @@ env_args:
   map_name: "3m_3m" # 3 marines by default
   difficulty: "3"
   heuristic: False
-  measure_fps: True
-  move_amount: 5
+  move_amount: 2
   reward_death_value: 10
   reward_negative_scale: 0.5
   reward_only_positive: True
@@ -18,8 +17,9 @@ env_args:
   step_mul: 8
   obs_instead_of_state: False
   obs_own_health: True
-  obs_targets: False
+  obs_all_health: True
   continuing_episode: False
+  restrict_actions: True
   game_version: "3.16.1"
 
 test_nepisode: 32

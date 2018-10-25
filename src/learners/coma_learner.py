@@ -34,7 +34,7 @@ class COMALearner:
         bs = batch.batch_size
         max_t = batch.max_seq_length
         rewards = batch["reward"][:, :-1]
-        actions = batch["actions"][:, :-1]
+        actions = batch["actions"][:, :]
         terminated = batch["terminated"][:, :-1].float()
         mask = batch["filled"][:, :-1].float()
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
@@ -42,12 +42,14 @@ class COMALearner:
 
         critic_mask = mask.clone()
         # For SARSA: can't bootstrap off 2nd-to-last state as last state has no action computed
-        critic_mask[:, -1].zero_()
+        # critic_mask[:, -1].zero_()
 
         mask = mask.repeat(1, 1, self.n_agents).view(-1)
 
         q_vals, critic_train_stats = self._train_critic(batch, rewards, terminated, actions, avail_actions,
                                                         critic_mask, bs, max_t)
+
+        actions = actions[:,:-1]
 
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
@@ -107,14 +109,22 @@ class COMALearner:
 
     def _train_critic(self, batch, rewards, terminated, actions, avail_actions, mask, bs, max_t):
         # Optimise critic
-        target_q_vals = self.target_critic(batch)[:, :-1]
+        target_q_vals = self.target_critic(batch)[:, :]
         targets_taken = th.gather(target_q_vals, dim=3, index=actions).squeeze(3)
-        targets_taken = th.cat([targets_taken[:, 1:], th.zeros_like(targets_taken[:, 0:1])], dim=1)
 
         # Calculate td-lambda targets
         targets = build_td_lambda_targets(rewards, terminated, mask, targets_taken, self.n_agents, self.args.gamma, self.args.td_lambda)
-
-        q_vals = th.zeros_like(target_q_vals)
+        # --- DEBUGGING CODE ---
+        # from utils.rl_utils import build_td_lambda_targets__old
+        # targets_taken_old = th.cat([targets_taken[:, 1:], th.zeros_like(targets_taken[:, 0:1])], dim=1)
+        # targets_old = build_td_lambda_targets__old(rewards, terminated, mask, targets_taken_old, self.n_agents, self.args.gamma, self.args.td_lambda)
+        # diff = (targets - targets_old)
+        # #
+        # import numpy as np
+        # allclose = np.allclose(targets.detach(), targets_old.detach(), 1e-3)
+        # print("close", allclose)
+        # --- ---
+        q_vals = th.zeros_like(target_q_vals)[:,:-1]
 
         running_log = {
             "critic_loss": [],
@@ -164,3 +174,17 @@ class COMALearner:
         self.mac.cuda()
         self.critic.cuda()
         self.target_critic.cuda()
+
+    def save_models(self, path):
+        self.mac.save_models(path)
+        th.save(self.critic.state_dict(), "{}/critic.th".format(path))
+        th.save(self.agent_optimiser.state_dict(), "{}/agent_opt.th".format(path))
+        th.save(self.critic_optimiser.state_dict(), "{}/critic_opt.th".format(path))
+
+    def load_models(self, path):
+        self.mac.load_models(path)
+        self.critic.load_state_dict(th.load("{}/critic.th".format(path), map_location=lambda storage, loc: storage))
+        # Not quite right but I don't want to save target networks
+        self.target_critic.load_state_dict(self.critic.state_dict())
+        self.agent_optimiser.load_state_dict(th.load("{}/agent_opt.th".format(path), map_location=lambda storage, loc: storage))
+        self.critic_optimiser.load_state_dict(th.load("{}/critic_opt.th".format(path), map_location=lambda storage, loc: storage))

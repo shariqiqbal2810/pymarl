@@ -34,6 +34,9 @@ class EpisodeRunner:
     def get_env_info(self):
         return self.env.get_env_info()
 
+    def save_replay(self, name):
+        self.env.save_replay(name)
+
     def reset(self):
         self.batch = self.new_batch()
         self.env.reset()
@@ -79,6 +82,10 @@ class EpisodeRunner:
             "obs": [self.env.get_obs()]
         }
         self.batch.update(last_data, ts=self.t)
+
+        # Select actions in the last stored state
+        actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, test_mode=test_mode)
+        self.batch.update({"actions": actions}, ts=self.t)
 
         cur_stats = self.test_stats if test_mode else self.train_stats
         cur_returns = self.test_returns if test_mode else self.train_returns

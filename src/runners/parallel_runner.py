@@ -56,6 +56,9 @@ class ParallelRunner:
     def get_env_info(self):
         return self.env_info
 
+    def save_replay(self, name):
+        pass
+
     def reset(self):
         self.batch = self.new_batch()
 
@@ -91,12 +94,25 @@ class ParallelRunner:
         envs_not_terminated = [b_idx for b_idx, termed in enumerate(terminated) if not termed]
         final_env_infos = []  # may store extra stats like battle won. this is filled in ORDER OF TERMINATION
 
-        while not all_terminated:
+        while True:
 
             # Pass the entire batch of experiences up till now to the agents
             # Receive the actions for each agent at this timestep in a batch for each un-terminated env
             actions = self.mac.select_actions(self.batch, t_ep=self.t, t_env=self.t_env, bs=envs_not_terminated, test_mode=test_mode)
             cpu_actions = actions.to("cpu").numpy()
+
+            # Update the actions taken
+            actions_chosen = {
+                "actions": actions.unsqueeze(1)
+            }
+            self.batch.update(actions_chosen, bs=envs_not_terminated, ts=self.t, mark_filled=False)
+
+            # Update terminated envs after adding post_transition_data
+            envs_not_terminated = [b_idx for b_idx, termed in enumerate(terminated) if not termed]
+            all_terminated = all(terminated)
+            if all_terminated:
+                break
+
             # Send actions to each env
             action_idx = 0
             for idx, parent_conn in enumerate(self.parent_conns):
@@ -106,7 +122,7 @@ class ParallelRunner:
 
             # Post step data we will insert for the current timestep
             post_transition_data = {
-                "actions": actions.unsqueeze(1),
+                # "actions": actions.unsqueeze(1),
                 "reward": [],
                 "terminated": []
             }
@@ -152,9 +168,6 @@ class ParallelRunner:
 
             self.batch.update(pre_transition_data, bs=envs_not_terminated, ts=self.t, mark_filled=True)
 
-            # Update terminated envs after adding post_transition_data
-            envs_not_terminated = [b_idx for b_idx, termed in enumerate(terminated) if not termed]
-            all_terminated = all(terminated)
 
         if not test_mode:
             self.t_env += self.env_steps_this_run

@@ -6,6 +6,9 @@ epsilon_start: 1.0
 epsilon_finish: 0.05
 epsilon_anneal_time: 20000
 
+runner: "parallel"
+batch_size_run: 8
+
 buffer_size: 500
 
 # update the target network every {} episodes
@@ -20,4 +23,4 @@ mixing_embed_dim: 32
 skip_connections: False
 hyper_initialization_nonzeros: 0
 
-name: "qmix"
+name: "qmix_parallel"

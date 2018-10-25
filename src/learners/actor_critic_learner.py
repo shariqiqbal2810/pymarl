@@ -59,22 +59,30 @@ class ActorCriticLearner:
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         # Get the relevant quantities
+
         rewards = batch["reward"][:, :-1]
-        actions = batch["actions"][:, :-1]
+        actions = batch["actions"][:, :]
         terminated = batch["terminated"][:, :-1].float()
         mask = batch["filled"][:, :-1].float()
         mask[:, 1:] = mask[:, 1:] * (1 - terminated[:, :-1])
         avail_actions = batch["avail_actions"][:, :-1]
 
+        # No experiences to train on in this minibatch
+        if mask.sum() == 0:
+            self.logger.log_stat("Mask_Sum_Zero", 1, t_env)
+            self.logger.console_logger.error("Actor Critic Learner: mask.sum() == 0 at t_env {}".format(t_env))
+            return
+
         mask = mask.repeat(1, 1, self.n_agents)
 
         critic_mask = mask.clone()
-        if self.critic.output_type == "q":
-            critic_mask[:, -1].zero_()
-        if self.separate_baseline_critic:
-            baseline_critic_mask = mask.clone()
-            if self.critic.output_type == "q":
-                baseline_critic_mask[:, -1].zero_()
+        baseline_critic_mask = mask.clone()
+        # if self.critic.output_type == "q":
+        #     critic_mask[:, -1].zero_()
+        # if self.separate_baseline_critic:
+        #     baseline_critic_mask = mask.clone()
+        #     if self.critic.output_type == "q":
+        #         baseline_critic_mask[:, -1].zero_()
 
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
@@ -109,8 +117,12 @@ class ActorCriticLearner:
             else:
                 baseline = v_s
 
+        actions = actions[:,:-1]
+
         if self.critic.output_type == "q":
             q_sa = th.gather(q_sa, dim=3, index=actions).squeeze(3)
+            if self.args.critic_q_fn == "coma" and self.args.coma_mean_q:
+                q_sa = q_sa.mean(2, keepdim=True).expand(-1, -1, self.n_agents)
         q_sa = self.nstep_returns(rewards, mask, q_sa, self.args.q_nstep)
 
         advantages = (q_sa - baseline).detach().squeeze()
@@ -121,11 +133,11 @@ class ActorCriticLearner:
         pi_taken[mask == 0] = 1.0
         log_pi_taken = th.log(pi_taken)
 
-        coma_loss = - ((advantages * log_pi_taken) * mask).sum() / mask.sum()
+        pg_loss = - ((advantages * log_pi_taken) * mask).sum() / mask.sum()
 
         # Optimise agents
         self.agent_optimiser.zero_grad()
-        coma_loss.backward()
+        pg_loss.backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.agent_params, self.args.grad_norm_clip)
         self.agent_optimiser.step()
 
@@ -139,7 +151,7 @@ class ActorCriticLearner:
                 self.logger.log_stat(key, sum(critic_train_stats[key])/ts_logged, t_env)
 
             self.logger.log_stat("advantage_mean", (advantages * mask).sum().item() / mask.sum().item(), t_env)
-            self.logger.log_stat("coma_loss", coma_loss.item(), t_env)
+            self.logger.log_stat("pg_loss", pg_loss.item(), t_env)
             self.logger.log_stat("agent_grad_norm", grad_norm, t_env)
             self.logger.log_stat("pi_max", (pi.max(dim=-1)[0] * mask).sum().item() / mask.sum().item(), t_env)
             self.log_stats_t = t_env
@@ -151,11 +163,11 @@ class ActorCriticLearner:
 
         all_vals = th.zeros_like(target_vals)
 
-        target_vals = target_vals[:, :-1]
+        # target_vals = target_vals[:, :-1]
 
         if critic.output_type == 'q':
             target_vals = th.gather(target_vals, dim=3, index=actions)
-            target_vals = th.cat([target_vals[:, 1:], th.zeros_like(target_vals[:, 0:1])], dim=1)
+            # target_vals = th.cat([target_vals[:, 1:], th.zeros_like(target_vals[:, 0:1])], dim=1)
         target_vals = target_vals.squeeze(3)
 
         # Calculate td-lambda targets
@@ -211,9 +223,10 @@ class ActorCriticLearner:
             q_vals = all_vals[:, :-1]
             v_s = None
         else:
-            # USE THIS FOR GAE
+            # USE THIS FOR GAE:
             # q_vals = build_td_lambda_targets(rewards, terminated, mask, all_vals.squeeze(3)[:, 1:], self.n_agents,
             #                                  self.args.gamma, self.args.td_lambda)
+            # OR THIS IF ACCUMULATING N-step RETURN LATER
             q_vals = all_vals[:, :-1].squeeze(3)
             v_s = all_vals[:, :-1].squeeze(3)
 
@@ -307,6 +320,7 @@ class ActorCriticLearner:
     def cuda(self):
         self.mac.cuda()
         self.critic.cuda()
+        self.target_critic.cuda()
         if self.separate_baseline_critic:
             self.baseline_critic.cuda()
-        self.target_critic.cuda()
+            self.target_baseline_critic.cuda()

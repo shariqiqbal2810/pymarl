@@ -38,6 +38,7 @@ def run(_run, _config, _log, pymongo_client):
 
     # configure tensorboard logger
     unique_token = "{}__{}".format(args.name, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+    args.unique_token = unique_token
     if args.use_tensorboard:
         tb_logs_direc = os.path.join(dirname(dirname(abspath(__file__))), "results", "tb_logs")
         tb_exp_direc = os.path.join(tb_logs_direc, "{}").format(unique_token)
@@ -69,6 +70,15 @@ def run(_run, _config, _log, pymongo_client):
     # Making sure framework really exits
     os._exit(os.EX_OK)
 
+
+def evaluate_sequential(args, runner):
+
+    replay_name = os.path.basename(os.path.dirname(os.path.normpath(args.checkpoint_path))) + str(runner.t_env)
+
+    for _ in range(args.test_nepisode):
+        runner.run(test_mode=True)
+
+    runner.save_replay(replay_name)
 
 def run_sequential(args, logger):
 
@@ -112,6 +122,15 @@ def run_sequential(args, logger):
     if args.use_cuda:
         learner.cuda()
 
+    if args.checkpoint_path != "":
+        logger.console_logger.info("Loading model from {}".format(args.checkpoint_path))
+        learner.load_models(args.checkpoint_path)
+        runner.t_env = int(os.path.basename(os.path.normpath(args.checkpoint_path)))
+
+        if args.save_replay:
+            evaluate_sequential(args, runner)
+            return
+
     # start training
     episode = 0
     last_test_T = -args.test_interval - 1
@@ -151,17 +170,16 @@ def run_sequential(args, logger):
             for _ in range(n_test_runs):
                 runner.run(test_mode=True)
 
-        # TODO: Sort out model saving
-        # save model once in a while
         if args.save_model and (runner.t_env - model_save_time >= args.save_model_interval or model_save_time == 0):
             model_save_time = runner.t_env
-            logger.console_logger.info("Saving models")
-
-            save_path = os.path.join(args.local_results_path, "models") #"results/models/{}".format(unique_token)
+            save_path = os.path.join(args.local_results_path, "models", args.unique_token, str(runner.t_env))
+            #"results/models/{}".format(unique_token)
             os.makedirs(save_path, exist_ok=True)
+            logger.console_logger.info("Saving models to {}".format(save_path))
 
-            # learner obj will save all agent and further models used
-            # learner.save_models(path=save_path, token=unique_token, T=runner.t_env)
+            # learner should handle saving/loading -- delegate actor save/load to mac,
+            # use appropriate filenames to do critics, optimizer states
+            learner.save_models(save_path)
 
         episode += args.batch_size_run
 
