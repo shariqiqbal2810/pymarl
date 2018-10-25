@@ -18,6 +18,7 @@ env_args:
     observe_one_hot: False
     p_stags_rest: 0.0
     p_hare_rest: 0.0
+    print_caught_prey: False
     reward_hare: 5
     reward_stag: 10
     reward_collision: 0.0
