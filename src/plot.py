@@ -2,6 +2,7 @@
 
 import json
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import colors as mcolors
 import torch
 import numpy as np
@@ -3947,7 +3948,7 @@ if plot_please == 135:
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
     plt.show()
 
-plot_please = 136
+#plot_please = 136
 if plot_please == 136:
     print("Refactored 10x10 goathunt experiment with agent-centric intrinsic exploration.")
     names = ['wen_refactor_icql_goat_hunt_10x10_slope0.8_nopain_tdlam0.8_190918',
@@ -3960,7 +3961,7 @@ if plot_please == 136:
     legend = ['ICQL (0.5, ir=0)', 'ICQL (0.5, ir=1)', 'ICQL (0.5, ir=10)', 'ICQL (0.5, ir=100)',
               'ICQL (0.5, ir=10, ib=0.05)', 'ICQL (0.5, ir=10, ib=0.5, std)', 'ICQL (0.5, ir=10, ib=0.25, var)']
     keys = ['return_mean', 'ep_length_mean']
-    single_keys = ['loss', 'td_error_abs', 'q_taken_mean', 'grad_norm']
+    single_keys = ['loss', 'td_error_abs', 'critic_q_taken_mean', 'q_taken_mean']
     # single_keys = []
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 2E6
@@ -3998,4 +3999,189 @@ if plot_please == 136:
                     test=False, max_time=max_time,
                     colors=colors, longest_runs=0, ax=sax, min_time=min_time,
                     legend_pos=['upper right'], legend_plot=[False, False, False, False], **kwargs)
+    plt.show()
+
+#plot_please = 137
+if plot_please == 137:
+    print("Plot that shows that IQL and QMIX are equivalent on pred-prey [for talk2018oct].")
+    include_icql = False
+    names = ['wen_pp6x6_riql_100918', 'wen_refactor_vdn_pred_prey_6x6_skip_250918',
+             'wen_refactor_qmix_pred_prey_6x6_skip_250918',
+             'wen_pp6x6_ricql_0.5_detach_100918', 'wen_pp6x6_ricql_0.9_100918', 'wen_pp6x6_ricql_1.0_100918'
+             ]
+    legend = ['IQL', 'VDN', 'QMIX', 'ICQL (0.5)', 'ICQL (0.9)', 'ICQL (1.0)']
+    keys = ['return_mean']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 5E5
+    min_time = int(0*4E5)
+    colors = ['red', 'orange', 'green', 'black', 'blue', 'c']
+    reward_horizons = [] # [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1, 2)
+    for t in range(2):
+        plot_db_compare(names[:(6 if include_icql else 3)], legend=legend if t==0 else None,
+                            keys=keys, refactored=True, title='4 agents(3x3) 1 prey on 6x6',
+                            test=t==1, max_time=max_time, min_time=min_time,
+                            colors=colors, longest_runs=0, ax=ax[t],
+                            legend_pos=['lower right'], legend_plot=[True], **kwargs)
+        y_min, y_max = ax[t].get_ylim()
+        ax[t].set_ylim(y_min, 0.0)
+    plt.show()
+
+#plot_please = 138
+if plot_please == 138:
+    print("Plot that shows that IQL and QMIX are equivalent on stag_hunt [for talk2018oct].")
+    #names = ['wen_refactor_iql_stag_hunt_10x10_nopain_smallobs_130918',
+    #         'wen_refactor_qmix_stag_hunt_10x10_nopain_smallobs_130918',
+    #         'wen_staghunt_10x10_refactor_iql_nopain_130918',
+    #         'wen_staghunt_10x10_refactor_qmix_nopain_130918']
+    #legend = ['IQL (3x3)', 'QMIX (3x3)', 'IQL (3x3)', 'QMIX (3x3)']
+    names = ['wen_staghunt_20x20_refactor_iql_reward_120918',
+             'wen_refactor_vdn_stag_hunt_20x20_reward_140918',
+             'wen_refactor_qmix_stag_hunt_20x20_reward_newskip_140918']
+    legend = ['IQL', 'VDN', 'QMIX']
+    keys = ['return_mean']
+    single_keys = []
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1.5E6
+    min_time = 0  # int(3E6)
+    colors = ['red', 'orange', 'green']
+    reward_horizons = []  # [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                    title='4 agents(5x5) 1 stag 1 hare on 20x20',
+                    test=True, max_time=max_time, min_time=min_time,
+                    colors=colors, longest_runs=0, ax=ax,
+                    legend_pos=['lower right'], legend_plot=[True], **kwargs)
+    plt.show()
+
+#plot_please = 139
+if plot_please == 139:
+    print("Refactored 10x10 goathunt experiment [for talk2018oct].")
+    names = ['wen_refactor_iql_goat_hunt_10x10_slope0.5_nopain_180918',
+             'wen_refactor_qmix_goat_hunt_10x10_slope0.5_nopain_180918',
+             'wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
+             'wen_refactor_qmix_goat_hunt_10x10_slope0.8_nopain_180918',]
+    legend = ['IQL (p=0.5)',
+              'QMIX (p=0.5)',
+              'IQL (p=0.8)',
+              'QMIX (p=0.8)']
+    keys = ['return_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['orange', 'green', 'red', 'blue']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    # Plot keys and their test
+    plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 agents(5x5) 1 goat 1 sheep on 10x10',
+                        test=True, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax,
+                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+    # Plot horizontal helper lines
+    for i in range(len(keys)):
+        for h in range(len(reward_horizons)):
+            ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 140
+if plot_please == 140:
+    print("Refactored 10x10 nopain staghunt experiment [for talk2018oct].")
+    legend = ['IQL (10x10)', 'VDN (10x10)', 'QMIX (10x10)', 'IQL (20x20)', 'VDN (20x20)', 'QMIX (20x20)']
+    names = [#'wen_staghunt_10x10_refactor_iql_nopain_130918',
+             'wen_refactor_iql_stag_hunt_10x10_nopain_250918',
+             'wen_refactor_vdn_stag_hunt_10x10_nopain_250918',
+             #'wen_staghunt_10x10_refactor_qmix_nopain_130918',
+             'wen_refactor_qmix_stag_hunt_10x10_nopain_250918',
+             'wen_refactor_iql_stag_hunt_20x20_nopain_250918',
+             'wen_refactor_vdn_stag_hunt_20x20_nopain_250918',
+             'wen_refactor_qmix_stag_hunt_20x20_nopain_skip_250918']
+    keys = ['return_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'orange', 'green', 'magenta', 'y', 'c', 'blue']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    # Plot keys and their test
+    plot_db_compare(names, legend=legend, keys=keys, refactored=True,
+                        title='4 agents(5x5) 1 stag 1 hare',
+                        test=True, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax,
+                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+    # Plot horizontal helper lines
+    for i in range(len(keys)):
+        for h in range(len(reward_horizons)):
+            ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 141
+if plot_please == 141:
+    print("Refactored 10x10 nopain goathunt exploration experiment [for talk2018oct].")
+    legend = ['IQL (no explore)', 'ICQL (no explore)', 'ICQL (sig=1)', 'ICQL (sig=10)',
+              'ICQL (sig=10, b=0.05)', 'ICQL (sig=100)']
+    names = ['wen_refactor_iql_goat_hunt_10x10_slope0.8_nopain_180918',
+             'wen_refactor_icql_goat_hunt_10x10_slope0.8_nopain_tdlam0.8_190918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore1.0_bias0.0_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore10.0_bias0.0_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.05_alpha0.9998_beta1_240918',
+             'wen_refactor_icql_goat_hunt_10x10_nopain_slope0.8_lam0.8_explore100.0_bias0.0_alpha0.9998_beta1_240918']
+    keys = ['return_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1, 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title='4 agents(5x5) 1 goat 1 sheep' if t==0 else '10x10 mountain p=0.8',
+                        test=t==1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[t], legend=legend if t==1 else None,
+                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+        #y_min, y_max = ax[t].get_ylim()
+        ax[t].set_ylim(0.0, 10.0)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            for h in range(len(reward_horizons)):
+                ax[t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 142
+if plot_please == 142:
+    print("Starcraft 1 with many many agents")
+    legend = ['3m', '5m', '8m', '12m', '15m', '20m']
+    names = ['SC1TEST_3m', 'SC1TEST_5m', 'SC1TEST_8m', 'SC1TEST_12m', 'SC1TEST_15m', 'SC1TEST_20m']
+    #names = ['SC1TEST_12m']
+    keys = ['battle_won_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = 2.5E6
+    min_time = 1E6  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    # Plot keys and their test
+    for t in range(1):
+        plot_db_compare(names, keys=keys, refactored=True, title='QMIX for StarCraft 1 Marines',
+                        test=True, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax, legend=legend,
+                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+        #y_min, y_max = ax[t].get_ylim()
+        ax.set_ylim(0.0, 1.0)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            for h in range(len(reward_horizons)):
+                ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
