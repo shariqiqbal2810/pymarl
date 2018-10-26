@@ -68,7 +68,7 @@ class PaidLearner(ACL):
         # Modify reward
         log_pi = th.log(pi_taken)
         log_pi_decentral = th.log(pi_decentral_taken)
-        rewards = rewards + self.distillation_factor * (log_pi / log_pi_decentral).sum(dim=-1, keepdim=True)
+        rewards = rewards - self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
 
         # Train the critic critic_train_reps times
         for _ in range(self.args.critic_train_reps):
@@ -99,10 +99,10 @@ class PaidLearner(ACL):
         q_sa = self.nstep_returns(rewards, mask, q_sa, self.args.q_nstep)
         advantages = (q_sa - baseline).detach().squeeze()
 
-        # Calculate central policy loss with mask
+        # Calculate central policy loss with mask (negative of the maximised loss)
         pg_loss = - ((advantages * log_pi) * mask).sum() / mask.sum()
-        # Calculate decentralised policy distillation loss
-        pg_loss = pg_loss - self.distillation_factor * (log_pi_decentral * mask).sum() / mask.sum()
+        # Calculate decentralised policy distillation loss (negative of negative loss)
+        pg_loss = pg_loss + self.distillation_factor * (log_pi_decentral * mask).sum() / mask.sum()
 
         # Optimise agents
         self.agent_optimiser.zero_grad()

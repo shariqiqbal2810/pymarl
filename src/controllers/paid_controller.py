@@ -52,7 +52,7 @@ class PaidMAC (BasicMAC):
 
     def _build_inputs(self, batch, t):
         """ Overwrites the BasicMAC to build inputs that contain the state and the last action. """
-        # Assumes homogenous agents with flat observations.
+        # Assumes homogeneous agents with flat observations.
         # Other MACs might want to e.g. delegate building inputs to each agent
         bs = batch.batch_size
         inputs = []
