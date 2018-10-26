@@ -4218,22 +4218,27 @@ if plot_please == 143:
 plot_please = 144
 if plot_please == 144:
     print("First PAID experiment on refactored 6x6 nopain stag-only-hunt.")
-    legend = ['IQL', 'QMIX', 'Central-V (upd 200)', 'Central-V (upd 2k, before)', 'Central-V (upd 2k, after)',
-              'PAID (beta=0.0)', 'PAID (beta=1.0)', 'PAID (beta=10.0)']
+    legend = ['IQL', 'QMIX', 'QMIX (no trunc)', 'Central-V (default)', 'Central-V (upd 2k, before)',
+              'Central-V (upd 2k, after, exp20k)', 'Central-V (after, exp20k, emb32)',
+              'PAID (beta=0.0)', 'PAID (beta=1.0)', 'PAID (beta=10.0)'
+              ]
     names = ['wen_refactor_iql_stag_hunt_onlystag_nopain_261018',
              'wen_refactor_qmix_stag_hunt_onlystag_nopain_261018',
+             'wen_refactor_qmix_stag_hunt_onlystag_nopain_notruc_261018',
              'wen_refactor_centralV_stag_hunt_onlystag_nopain_261018',
              'wen_refactor_centralV_stag_hunt_onlystag_nopain_tu2000_261018',
              'wen_refactor_centralV_stag_hunt_onlystag_nopain_tu2k_aftersoft_explore20k_261018',
+             'wen_refactor_centralV_stag_hunt_onlystag_nopain_aftersoft_explore20k_embed32_261018',
              'wen_refactor_paid_stag_hunt_onlystag_nopain_beta0.0_261018',
              'wen_refactor_paid_stag_hunt_onlystag_nopain_beta1.0_261018',
-             'wen_refactor_paid_stag_hunt_onlystag_nopain_beta10.0_261018']
+             'wen_refactor_paid_stag_hunt_onlystag_nopain_beta10.0_261018'
+             ]
     keys = ['return_mean', 'ep_length_mean']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 0  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
-    colors = ['y', 'green', 'red', 'magenta', 'orange', 'c', 'blue', 'black']
+    colors = ['y', 'green', 'lime', 'red', 'magenta', 'orange', 'c', 'blue', 'black', 'brown']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(len(keys), 2)
@@ -4243,7 +4248,43 @@ if plot_please == 144:
                         title='4 agents(5x5) hunt 1 stag' if t == 0 else 'in a 6x6 bounded gridworld',
                         test=t == 1, max_time=max_time, min_time=min_time,
                         colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
-                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+                        legend_pos=['upper right'], legend_plot=[True], **kwargs)
+        for k in range(len(keys)):
+            if keys[k] == "reward_mean":
+                #y_min, y_max = ax[t].get_ylim()
+                ax[t].set_ylim(0.0, 10.0)
+                # Plot horizontal helper lines
+                for i in range(len(keys)):
+                    for h in range(len(reward_horizons)):
+                        ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 145
+if plot_please == 145:
+    print("CentralV experiment on refactored 4x4 nopain stag-only-hunt.")
+    legend = ['Central-V (default)', 'C-V (upd 2k, after, e128)', 'C-V (upd 20k, after, e128)',
+              'C-V (after, e32)', 'C-V (upd 2k, after, e32)']
+    names = ['wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_261018',
+             'wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_tu2000_aftersoft_261018',
+             'wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_tu20000_aftersoft_261018',
+             'wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_aftersoft_e32_261018',
+             'wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_tu2000_aftersoft_e32_261018']
+    keys = ['return_mean', 'ep_length_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['orange', 'c', 'blue', 'red', 'magenta', 'black', 'green', 'lime', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(keys), 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title='4 agents(3x3) hunt 1 stag' if t == 0 else 'in a 4x4 bounded gridworld',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
+                        legend_pos=['upper right'], legend_plot=[True], **kwargs)
         for k in range(len(keys)):
             if keys[k] == "reward_mean":
                 #y_min, y_max = ax[t].get_ylim()

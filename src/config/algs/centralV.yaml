@@ -26,6 +26,8 @@ td_lambda: 0.8
 # use COMA
 agent_output_type: "pi_logits"
 learner: "actor_critic_learner"
+critic_conditions_on_actions: False
+critic_conditions_on_observations: False
 critic_embed_dim: 128
 critic_q_fn: "centralV"
 critic_baseline_fn: "centralV"

@@ -10,6 +10,8 @@ class CentralVCritic(nn.Module):
         self.args = args
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
+        self.conditions_on_actions = getattr(args, "critic_conditions_on_actions", True)
+        self.conditions_on_obs = getattr(args, "critic_conditions_on_observations", True)
         critic_embed_dim = getattr(args, "critic_embed_dim", 128)
 
         input_shape = self._get_input_shape(scheme)
@@ -36,17 +38,19 @@ class CentralVCritic(nn.Module):
         inputs.append(batch["state"][:, ts])
 
         # observations
-        inputs.append(batch["obs"][:, ts].view(bs, max_t, -1))
+        if self.conditions_on_obs:
+            inputs.append(batch["obs"][:, ts].view(bs, max_t, -1))
 
         # last actions
-        if t == 0:
-            inputs.append(th.zeros_like(batch["actions_onehot"][:, 0:1]).view(bs, max_t, 1, -1))
-        elif isinstance(t, int):
-            inputs.append(batch["actions_onehot"][:, slice(t-1, t)].view(bs, max_t, 1, -1))
-        else:
-            last_actions = th.cat([th.zeros_like(batch["actions_onehot"][:, 0:1]), batch["actions_onehot"][:, :-1]], dim=1)
-            last_actions = last_actions.view(bs, max_t, 1, -1)
-            inputs.append(last_actions)
+        if self.conditions_on_actions:
+            if t == 0:
+                inputs.append(th.zeros_like(batch["actions_onehot"][:, 0:1]).view(bs, max_t, 1, -1))
+            elif isinstance(t, int):
+                inputs.append(batch["actions_onehot"][:, slice(t-1, t)].view(bs, max_t, 1, -1))
+            else:
+                last_actions = th.cat([th.zeros_like(batch["actions_onehot"][:, 0:1]), batch["actions_onehot"][:, :-1]], dim=1)
+                last_actions = last_actions.view(bs, max_t, 1, -1)
+                inputs.append(last_actions)
 
         inputs = th.cat([x.reshape(bs * max_t, -1) for x in inputs], dim=1)
         return inputs, bs, max_t
@@ -55,7 +59,9 @@ class CentralVCritic(nn.Module):
         # state
         input_shape = scheme["state"]["vshape"]
         # observations
-        input_shape += scheme["obs"]["vshape"] * self.n_agents
+        if self.conditions_on_obs:
+            input_shape += scheme["obs"]["vshape"] * self.n_agents
         # last actions
-        input_shape += scheme["actions_onehot"]["vshape"][0] * self.n_agents
+        if self.conditions_on_actions:
+            input_shape += scheme["actions_onehot"]["vshape"][0] * self.n_agents
         return input_shape
