@@ -4157,9 +4157,9 @@ if plot_please == 141:
                 ax[t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 142
+#plot_please = 142
 if plot_please == 142:
-    print("Starcraft 1 with many many agents")
+    print("Starcraft 2 with many many agents")
     legend = ['3m', '5m', '8m', '12m', '15m', '20m']
     names = ['SC1TEST_3m', 'SC1TEST_5m', 'SC1TEST_8m', 'SC1TEST_12m', 'SC1TEST_15m', 'SC1TEST_20m']
     #names = ['SC1TEST_12m']
@@ -4184,4 +4184,70 @@ if plot_please == 142:
         for i in range(len(keys)):
             for h in range(len(reward_horizons)):
                 ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 143
+if plot_please == 143:
+    print("Starcraft 1 with many many agents (this time for real)")
+    legend = ['3m', '5m', '8m', '12m', '30m']
+    names = ['SC1KK_3m', 'SC1KK_5m', 'SC1KK_8m', 'SC1KK_12m', 'SC2KK_30m']
+    #names = ['SC1TEST_12m']
+    keys = ['battle_won_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = 2.5E6
+    min_time = 0E6  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    # Plot keys and their test
+    for t in range(1):
+        plot_db_compare(names, keys=keys, refactored=True, title='QMIX for StarCraft 1 Marines',
+                        test=True, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax, legend=legend,
+                        legend_pos=['upper left'], legend_plot=[True], **kwargs)
+        #y_min, y_max = ax[t].get_ylim()
+        ax.set_ylim(0.0, 1.0)
+        # Plot horizontal helper lines
+        for i in range(len(keys)):
+            for h in range(len(reward_horizons)):
+                ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 144
+if plot_please == 144:
+    print("First PAID experiment on refactored 6x6 nopain stag-only-hunt.")
+    legend = ['IQL', 'QMIX', 'Central-V (upd 200)', 'Central-V (upd 2000)', 'PAID (beta=0.0)', 'PAID (beta=1.0)', 'PAID (beta=10.0)']
+    names = ['wen_refactor_iql_stag_hunt_onlystag_nopain_261018',
+             'wen_refactor_qmix_stag_hunt_onlystag_nopain_261018',
+             'wen_refactor_centralV_stag_hunt_onlystag_nopain_261018',
+             'wen_refactor_centralV_stag_hunt_onlystag_nopain_tu2000_261018',
+             'wen_refactor_paid_stag_hunt_onlystag_nopain_beta0.0_261018',
+             'wen_refactor_paid_stag_hunt_onlystag_nopain_beta1.0_261018',
+             'wen_refactor_paid_stag_hunt_onlystag_nopain_beta10.0_261018']
+    keys = ['return_mean', 'ep_length_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 1E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['y', 'green', 'red', 'magenta', 'c', 'blue', 'black']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(keys), 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title='4 agents(5x5) hunt 1 stag' if t == 0 else 'in a 6x6 bounded gridworld',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
+                        legend_pos=['lower right'], legend_plot=[True], **kwargs)
+        for k in range(len(keys)):
+            if keys[k] == "reward_mean":
+                #y_min, y_max = ax[t].get_ylim()
+                ax[t].set_ylim(0.0, 10.0)
+                # Plot horizontal helper lines
+                for i in range(len(keys)):
+                    for h in range(len(reward_horizons)):
+                        ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()

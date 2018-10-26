@@ -26,10 +26,7 @@ class MultinomialActionSelector():
         if test_mode and self.test_greedy:
             picked_actions = masked_policies.max(dim=2)[1]
         else:
-            try:
-                picked_actions = Categorical(masked_policies).sample().long()
-            except RuntimeError:
-                a = 5
+            picked_actions = Categorical(masked_policies).sample().long()
 
         return picked_actions
 
