@@ -24,6 +24,7 @@ env_args:
     reward_collision: 0.0
     reward_time: -0.1
     toroidal: False
+    truncate_episodes: True
     world_shape: [6, 6]
 
 t_max: 1000000

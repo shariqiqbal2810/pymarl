@@ -61,6 +61,7 @@ class StagHunt(MultiAgentEnv):
         self.batch_size = batch_size if self.batch_mode else 1
 
         # Define the environment grid
+        self.truncate_episodes = getattr(args, "truncate_episodes", True)
         self.observe_ids = getattr(args, "observe_ids", False)
         self.intersection_global_view = getattr(args, "intersection_global_view", False)
         self.intersection_unknown = getattr(args, "intersection_unknown", False)
@@ -194,7 +195,7 @@ class StagHunt(MultiAgentEnv):
         self.steps += 1
         if self.steps >= self.episode_limit:
             terminated = [True for _ in range(self.batch_size)]
-            info["episode_limit"] = True
+            info["episode_limit"] = self.truncate_episodes
         else:
             info["episode_limit"] = False
 
