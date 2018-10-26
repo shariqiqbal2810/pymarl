@@ -10,14 +10,15 @@ class CentralVCritic(nn.Module):
         self.args = args
         self.n_actions = args.n_actions
         self.n_agents = args.n_agents
+        critic_embed_dim = getattr(args, "critic_embed_dim", 128)
 
         input_shape = self._get_input_shape(scheme)
         self.output_type = "v"
 
         # Set up network layers
-        self.fc1 = nn.Linear(input_shape, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 1)
+        self.fc1 = nn.Linear(input_shape, critic_embed_dim)
+        self.fc2 = nn.Linear(critic_embed_dim, critic_embed_dim)
+        self.fc3 = nn.Linear(critic_embed_dim, 1)
 
     def forward(self, batch, t=None):
         inputs, bs, max_t = self._build_inputs(batch, t=t)

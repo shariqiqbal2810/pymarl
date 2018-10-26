@@ -4218,11 +4218,13 @@ if plot_please == 143:
 plot_please = 144
 if plot_please == 144:
     print("First PAID experiment on refactored 6x6 nopain stag-only-hunt.")
-    legend = ['IQL', 'QMIX', 'Central-V (upd 200)', 'Central-V (upd 2000)', 'PAID (beta=0.0)', 'PAID (beta=1.0)', 'PAID (beta=10.0)']
+    legend = ['IQL', 'QMIX', 'Central-V (upd 200)', 'Central-V (upd 2k, before)', 'Central-V (upd 2k, after)',
+              'PAID (beta=0.0)', 'PAID (beta=1.0)', 'PAID (beta=10.0)']
     names = ['wen_refactor_iql_stag_hunt_onlystag_nopain_261018',
              'wen_refactor_qmix_stag_hunt_onlystag_nopain_261018',
              'wen_refactor_centralV_stag_hunt_onlystag_nopain_261018',
              'wen_refactor_centralV_stag_hunt_onlystag_nopain_tu2000_261018',
+             'wen_refactor_centralV_stag_hunt_onlystag_nopain_tu2k_aftersoft_explore20k_261018',
              'wen_refactor_paid_stag_hunt_onlystag_nopain_beta0.0_261018',
              'wen_refactor_paid_stag_hunt_onlystag_nopain_beta1.0_261018',
              'wen_refactor_paid_stag_hunt_onlystag_nopain_beta10.0_261018']
@@ -4231,7 +4233,7 @@ if plot_please == 144:
     max_time = 1E6
     min_time = 0  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
-    colors = ['y', 'green', 'red', 'magenta', 'c', 'blue', 'black']
+    colors = ['y', 'green', 'red', 'magenta', 'orange', 'c', 'blue', 'black']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(len(keys), 2)
