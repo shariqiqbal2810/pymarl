@@ -10,6 +10,7 @@ class PaidLearner(ACL):
         ACL.__init__(self, mac, scheme, logger, args)
         assert isinstance(mac, PaidMAC), "The MAC trained by PAID must be derived from PaidMAC."
         self.distillation_factor = getattr(args, "distillation_factor", 1.0)
+        self.propagate_divergence = getattr(args, "propagate_divergence", True)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         """ Trains both a centralised and a decentraslised policy using Planning-As-Inference-Distillation.
@@ -68,19 +69,23 @@ class PaidLearner(ACL):
         # Modify reward
         log_pi = th.log(pi_taken)
         log_pi_decentral = th.log(pi_decentral_taken)
-        rewards = rewards - self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
+        divergence = -self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
+        divergence[mask == 0] = 0
+        critic_rewards = rewards + (divergence if self.propagate_divergence else 0)
+        advantage_rewards = rewards + divergence
 
         # Train the critic critic_train_reps times
         for _ in range(self.args.critic_train_reps):
-            q_sa, v_s, critic_train_stats = self.critic_train_fn(self.critic, self.target_critic, self.critic_optimiser, batch,
-                                                                 rewards, terminated, actions, avail_actions, critic_mask)
+            q_sa, v_s, critic_train_stats = self.critic_train_fn(self.critic, self.target_critic, self.critic_optimiser,
+                                                                 batch, critic_rewards, terminated, actions,
+                                                                 avail_actions, critic_mask)
 
         # Compute the baseline
         if self.separate_baseline_critic:
             for _ in range(self.args.critic_train_reps):
                 q_sa_baseline, v_s_baseline, critic_train_stats_baseline = \
                     self.critic_train_fn(self.baseline_critic, self.target_baseline_critic, self.baseline_critic_optimiser,
-                                         batch, rewards, terminated, actions, avail_actions, baseline_critic_mask)
+                                         batch, critic_rewards, terminated, actions, avail_actions, baseline_critic_mask)
             if self.args.critic_baseline_fn == "coma":
                 baseline = (q_sa_baseline * pi).sum(-1).detach()
             else:
@@ -96,7 +101,7 @@ class PaidLearner(ACL):
             q_sa = th.gather(q_sa, dim=3, index=actions).squeeze(3)
             if self.args.critic_q_fn == "coma" and self.args.coma_mean_q:
                 q_sa = q_sa.mean(2, keepdim=True).expand(-1, -1, self.n_agents)
-        q_sa = self.nstep_returns(rewards, mask, q_sa, self.args.q_nstep)
+        q_sa = self.nstep_returns(advantage_rewards, mask, q_sa, self.args.q_nstep)
         advantages = (q_sa - baseline).detach().squeeze()
 
         # Calculate central policy loss with mask (negative of the maximised loss)
