@@ -70,7 +70,7 @@ class PaidLearner(ACL):
         log_pi = th.log(pi_taken)
         log_pi_decentral = th.log(pi_decentral_taken)
         divergence = -self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
-        divergence[mask == 0] = 0
+        divergence[mask[:, :, 0] == 0] = 0
         critic_rewards = rewards + (divergence if self.propagate_divergence else 0)
         advantage_rewards = rewards + divergence
 

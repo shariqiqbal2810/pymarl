@@ -4307,7 +4307,7 @@ if plot_please == 146:
     keys = ['return_mean', 'ep_length_mean']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
-    min_time = 0  # int(3E6)
+    min_time = 1E5  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
     colors = ['orange', 'red', 'magenta', 'c', 'blue', 'black', 'green', 'lime', 'y']
     reward_horizons = [0, 5, 10]
