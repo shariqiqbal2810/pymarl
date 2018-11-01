@@ -10,6 +10,7 @@ class PaidLearner(ACL):
         ACL.__init__(self, mac, scheme, logger, args)
         assert isinstance(mac, PaidMAC), "The MAC trained by PAID must be derived from PaidMAC."
         self.distillation_factor = getattr(args, "distillation_factor", 1.0)
+        self.prior_factor = getattr(args, "prior_factor", self.distillation_factor)
         self.propagate_divergence = getattr(args, "propagate_divergence", True)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
@@ -69,10 +70,10 @@ class PaidLearner(ACL):
         # Modify reward
         log_pi = th.log(pi_taken)
         log_pi_decentral = th.log(pi_decentral_taken)
-        divergence = -self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
+        divergence = self.distillation_factor * (log_pi - log_pi_decentral).sum(dim=-1, keepdim=True)
         divergence[mask[:, :, 0] == 0] = 0
-        critic_rewards = rewards + (divergence if self.propagate_divergence else 0)
-        advantage_rewards = rewards + divergence
+        critic_rewards = rewards - (divergence if self.propagate_divergence else 0)
+        advantage_rewards = rewards - divergence
 
         # Train the critic critic_train_reps times
         for _ in range(self.args.critic_train_reps):
@@ -107,7 +108,7 @@ class PaidLearner(ACL):
         # Calculate central policy loss with mask (negative of the maximised loss)
         pg_loss = - ((advantages * log_pi) * mask).sum() / mask.sum()
         # Calculate decentralised policy distillation loss (negative of negative loss)
-        pg_loss = pg_loss + self.distillation_factor * (log_pi_decentral * mask).sum() / mask.sum()
+        pg_loss = pg_loss - self.prior_factor * (log_pi_decentral * mask).sum() / mask.sum()
 
         # Optimise agents
         self.agent_optimiser.zero_grad()

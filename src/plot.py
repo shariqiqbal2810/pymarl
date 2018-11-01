@@ -4298,18 +4298,23 @@ if plot_please == 145:
 plot_please = 146
 if plot_please == 146:
     print("Paid experiment on refactored 4x4 nopain stag-only-hunt.")
-    legend = ['Central-V (after)', 'PAID (beta=0.0)', 'PAID (beta=0.1)', 'PAID (beta=1.0)', 'PAID (beta=10.0)']
+    legend = ['Central-V',
+              'PAID (beta=0.0, prop)', 'PAID (beta=0.1, prop)', 'PAID (beta=1.0, prop)', 'PAID (beta=10.0, prop)',
+              'PAID (beta=0.0, no prop)', 'PAID (beta=0.1, no prop)', 'PAID (beta=1.0, no prop)']
     names = ['wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_aftersoft_291018',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta0.0_291018',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta0.1_291018',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta1.0_291018',
-             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta10.0_291018']
+             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta10.0_291018',
+             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta0.0_noprop_291018',
+             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta0.1_noprop_291018',
+             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_beta1.0_noprop_291018']
     keys = ['return_mean', 'ep_length_mean']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 1E6
     min_time = 1E5  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
-    colors = ['orange', 'red', 'magenta', 'c', 'blue', 'black', 'green', 'lime', 'y']
+    colors = ['black', 'green', 'lime', 'c', 'blue', 'magenta', 'red', 'orange', 'y']
     reward_horizons = [0, 5, 10]
     ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
     fig, ax = plt.subplots(len(keys), 2)

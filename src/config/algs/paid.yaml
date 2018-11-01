@@ -34,5 +34,6 @@ name: "paid"
 learner: "paid_learner"
 mac: "paid_mac"
 distillation_factor: 1.0
+prior_factor: 1.0
 propagate_divergence: True
 
