@@ -29,10 +29,13 @@ critic_train_mode: "seq"
 critic_train_reps: 1
 q_nstep: 1 # 1 corresponds to normal r + gammaV
 
-# PAID specific parameters
+# PAID configuration parameters
 name: "paid"
 learner: "paid_learner"
 mac: "paid_mac"
+
+# PAID hyper-parameters
+critic_sampling_prob: 0.5
 distillation_factor: 1.0
 prior_factor: 1.0
 propagate_divergence: True

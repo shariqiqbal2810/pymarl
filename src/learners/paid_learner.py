@@ -61,7 +61,7 @@ class PaidLearner(ACL):
                                                                  batch, critic_rewards, terminated, actions,
                                                                  avail_actions, mask)
         # Compute advantage
-        baseline = self._compute_baseline(batch, rewards, divergence, terminated, actions, avail_actions, mask, policy,
+        baseline = self._compute_baseline(batch, critic_rewards, terminated, actions, avail_actions, mask, policy,
                                           q_sa, v_s)
         if self.critic.output_type == "q":
             q_sa = th.gather(q_sa, dim=3, index=actions).squeeze(3)

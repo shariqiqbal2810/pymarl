@@ -4347,6 +4347,7 @@ if plot_please == 147:
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.1_prior0.1_011118',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.1_prior1.0_011118',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.1_prior10.0_011118',
+             'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.1_prior100.0_011118',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.5_prior0.5_011118',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta1.0_prior1.0_011118',]
     keys = ['return_mean', 'ep_length_mean']
