@@ -52,7 +52,7 @@ class PaidLearner(ACL):
         mac_out = []
         self.mac.init_hidden(batch.batch_size)
         for t in range(batch.max_seq_length - 1):
-            agent_outs = self.mac.forward(batch, t=t)
+            agent_outs = self.mac.decentral_forward(batch, t=t)
             mac_out.append(agent_outs)
         pi_decentral = th.stack(mac_out, dim=1)  # Concat over time
         # Mask out unavailable actions, renormalise (as in action selection)
@@ -108,11 +108,11 @@ class PaidLearner(ACL):
         # Calculate central policy loss with mask (negative of the maximised loss)
         pg_loss = - ((advantages * log_pi) * mask).sum() / mask.sum()
         # Calculate decentralised policy distillation loss (negative of negative loss)
-        pg_loss = pg_loss - self.prior_factor * (log_pi_decentral * mask).sum() / mask.sum()
+        prior_loss = - self.prior_factor * (log_pi_decentral * mask).sum() / mask.sum()
 
         # Optimise agents
         self.agent_optimiser.zero_grad()
-        pg_loss.backward()
+        (pg_loss + prior_loss).backward()
         grad_norm = th.nn.utils.clip_grad_norm_(self.agent_params, self.args.grad_norm_clip)
         self.agent_optimiser.step()
 
@@ -127,6 +127,9 @@ class PaidLearner(ACL):
 
             self.logger.log_stat("advantage_mean", (advantages * mask).sum().item() / mask.sum().item(), t_env)
             self.logger.log_stat("pg_loss", pg_loss.item(), t_env)
+            self.logger.log_stat("prior_loss", prior_loss.item(), t_env)
             self.logger.log_stat("agent_grad_norm", grad_norm, t_env)
             self.logger.log_stat("pi_max", (pi.max(dim=-1)[0] * mask).sum().item() / mask.sum().item(), t_env)
+            self.logger.log_stat("abs_divergence", (divergence.abs() * mask[:, :, 0].unsqueeze(2)).sum().item()
+                                 / mask[:, :, 0].sum().item(), t_env)
             self.log_stats_t = t_env
