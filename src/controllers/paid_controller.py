@@ -16,7 +16,8 @@ class PaidMAC (BasicMAC):
 
     def select_actions(self, ep_batch, t_ep, t_env, bs=slice(None), test_mode=False, **kwargs):
         """ Action selection (runner). In test_mode, use the decentral_mac, otherwise use the central_mac (self). """
-        if test_mode:
+        use_critic = kwargs.get("use_critic", False)
+        if test_mode or use_critic:
             return self.decentral_mac.select_actions(ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
         else:
             return BasicMAC.select_actions(self, ep_batch, t_ep, t_env, bs, test_mode, **kwargs)
@@ -49,6 +50,10 @@ class PaidMAC (BasicMAC):
         """ Moves both MACs to the GPU. """
         BasicMAC.cuda(self)
         self.decentral_mac.cuda()
+
+    def post_episode(self, batch, test_mode):
+        """ Empty interface to comply with ICQLParallelRunner. """
+        pass
 
     def _build_inputs(self, batch, t):
         """ Overwrites the BasicMAC to build inputs that contain the state and the last action. """

@@ -13,65 +13,6 @@ class PaidLearner(ACL):
         self.prior_factor = getattr(args, "prior_factor", self.distillation_factor)
         self.propagate_divergence = getattr(args, "propagate_divergence", True)
 
-    def _compute_policy(self, batch, avail_actions, forward_fun):
-        """ Computes the full policy with the given <forward_fun>. """
-        mac_out = []
-        self.mac.init_hidden(batch.batch_size)
-        for t in range(batch.max_seq_length - 1):
-            agent_outs = forward_fun(batch, t=t)
-            mac_out.append(agent_outs)
-        pi = th.stack(mac_out, dim=1)  # Concat over time
-        # Mask out unavailable actions, renormalise (as in action selection)
-        pi[avail_actions == 0] = 0
-        pi = pi / pi.sum(dim=-1, keepdim=True)
-        pi[avail_actions == 0] = 0
-        return pi
-
-    def _chosen_policy(self, policy, actions, mask):
-        """ Selects the chosen <actions> from the full policy and masks unavailable actions with 1. """
-        pi_taken = th.gather(policy, dim=3, index=actions).squeeze(3)
-        pi_taken[mask == 0] = 1.0
-        return pi_taken
-
-    def _compute_baseline(self, batch, critic_rewards, terminated, actions, avail_actions, mask, policy, q_sa, v_s):
-        """ Computes the baseline for the advantage. """
-        if self.separate_baseline_critic:
-            for _ in range(self.args.critic_train_reps):
-                q_sa_baseline, v_s_baseline, critic_train_stats_baseline = \
-                    self.critic_train_fn(self.baseline_critic, self.target_baseline_critic, self.baseline_critic_optimiser,
-                                         batch, critic_rewards, terminated, actions, avail_actions, mask)
-            if self.args.critic_baseline_fn == "coma":
-                baseline = (q_sa_baseline * policy).sum(-1).detach()
-            else:
-                baseline = v_s_baseline
-        else:
-            if self.args.critic_baseline_fn == "coma":
-                baseline = (q_sa * policy).sum(-1).detach()
-            else:
-                baseline = v_s
-        return baseline
-
-    def _train_advantage(self, batch, rewards, divergence, terminated, actions, avail_actions, mask, policy):
-        """ Trains the critic and returns the <advantages> of the current batch. """
-        # Train the critic critic_train_reps times
-        mask = mask.clone()
-        critic_rewards = rewards - (divergence if self.propagate_divergence else 0)
-        for _ in range(self.args.critic_train_reps):
-            q_sa, v_s, critic_train_stats = self.critic_train_fn(self.critic, self.target_critic, self.critic_optimiser,
-                                                                 batch, critic_rewards, terminated, actions,
-                                                                 avail_actions, mask)
-        # Compute advantage
-        baseline = self._compute_baseline(batch, critic_rewards, terminated, actions, avail_actions, mask, policy,
-                                          q_sa, v_s)
-        if self.critic.output_type == "q":
-            q_sa = th.gather(q_sa, dim=3, index=actions).squeeze(3)
-            if self.args.critic_q_fn == "coma" and self.args.coma_mean_q:
-                q_sa = q_sa.mean(2, keepdim=True).expand(-1, -1, self.n_agents)
-        q_sa = self.nstep_returns(rewards - divergence, mask, q_sa, self.args.q_nstep)
-        advantages = (q_sa - baseline).detach().squeeze()
-        # Return advantages
-        return advantages, critic_train_stats
-
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):
         """ Trains both a centralised and a decentraslised policy using Planning-As-Inference-Distillation.
             Is based on ActorCriticLearner.train() """
@@ -134,3 +75,62 @@ class PaidLearner(ACL):
             self.logger.log_stat("abs_divergence", (divergence.abs() * mask[:, :, 0].unsqueeze(2)).sum().item()
                                  / mask[:, :, 0].sum().item(), t_env)
             self.log_stats_t = t_env
+
+    def _compute_policy(self, batch, avail_actions, forward_fun):
+        """ Computes the full policy with the given <forward_fun>. """
+        mac_out = []
+        self.mac.init_hidden(batch.batch_size)
+        for t in range(batch.max_seq_length - 1):
+            agent_outs = forward_fun(batch, t=t)
+            mac_out.append(agent_outs)
+        pi = th.stack(mac_out, dim=1)  # Concat over time
+        # Mask out unavailable actions, renormalise (as in action selection)
+        pi[avail_actions == 0] = 0
+        pi = pi / pi.sum(dim=-1, keepdim=True)
+        pi[avail_actions == 0] = 0
+        return pi
+
+    def _chosen_policy(self, policy, actions, mask):
+        """ Selects the chosen <actions> from the full policy and masks unavailable actions with 1. """
+        pi_taken = th.gather(policy, dim=3, index=actions).squeeze(3)
+        pi_taken[mask == 0] = 1.0
+        return pi_taken
+
+    def _compute_baseline(self, batch, critic_rewards, terminated, actions, avail_actions, mask, policy, q_sa, v_s):
+        """ Computes the baseline for the advantage. """
+        if self.separate_baseline_critic:
+            for _ in range(self.args.critic_train_reps):
+                q_sa_baseline, v_s_baseline, critic_train_stats_baseline = \
+                    self.critic_train_fn(self.baseline_critic, self.target_baseline_critic, self.baseline_critic_optimiser,
+                                         batch, critic_rewards, terminated, actions, avail_actions, mask)
+            if self.args.critic_baseline_fn == "coma":
+                baseline = (q_sa_baseline * policy).sum(-1).detach()
+            else:
+                baseline = v_s_baseline
+        else:
+            if self.args.critic_baseline_fn == "coma":
+                baseline = (q_sa * policy).sum(-1).detach()
+            else:
+                baseline = v_s
+        return baseline
+
+    def _train_advantage(self, batch, rewards, divergence, terminated, actions, avail_actions, mask, policy):
+        """ Trains the critic and returns the <advantages> of the current batch. """
+        # Train the critic critic_train_reps times
+        mask = mask.clone()
+        critic_rewards = rewards - (divergence if self.propagate_divergence else 0)
+        for _ in range(self.args.critic_train_reps):
+            q_sa, v_s, critic_train_stats = self.critic_train_fn(self.critic, self.target_critic, self.critic_optimiser,
+                                                                 batch, critic_rewards, terminated, actions,
+                                                                 avail_actions, mask)
+        # Compute advantage
+        baseline = self._compute_baseline(batch, critic_rewards, terminated, actions, avail_actions, mask, policy,
+                                          q_sa, v_s)
+        if self.critic.output_type == "q":
+            q_sa = th.gather(q_sa, dim=3, index=actions).squeeze(3)
+            if self.args.critic_q_fn == "coma" and self.args.coma_mean_q:
+                q_sa = q_sa.mean(2, keepdim=True).expand(-1, -1, self.n_agents)
+        q_sa = self.nstep_returns(rewards - divergence, mask, q_sa, self.args.q_nstep)
+        advantages = (q_sa - baseline).detach().squeeze()
+        # Return advantages
+        return advantages, critic_train_stats

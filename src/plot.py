@@ -4340,7 +4340,7 @@ if plot_please == 147:
     print("Paid experiment on refactored 4x4 nopain stag-only-hunt.")
     legend = ['Central-V', 'PAID (beta=0.0, prior=0.1)', 'PAID (beta=0.0, prior=1.0)',
               'PAID (beta=0.1, prior=0.1)', 'PAID (beta=0.1, prior=1.0)', 'PAID (beta=0.1, prior=10.0)',
-              'PAID (beta=0.5, prior=0.5)', 'PAID (beta=1.0, prior=1.0)']
+              'PAID (beta=0.1, prior=100.0)', 'PAID (beta=0.5, prior=0.5)', 'PAID (beta=1.0, prior=1.0)']
     names = ['wen_refactor_centralV_stag_hunt_4x4_onlystag_nopain_aftersoft_291018',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.0_prior0.1_011118',
              'wen_refactor_paid_stag_hunt_4x4_onlystag_nopain_aftersoft_v2_beta0.0_prior1.0_011118',

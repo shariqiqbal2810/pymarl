@@ -8,3 +8,6 @@ REGISTRY["parallel"] = ParallelRunner
 
 from .icql_runner import ICQLEpisodeRunner
 REGISTRY["icql"] = ICQLEpisodeRunner
+
+from .icql_runner import ICQLParallelRunner
+REGISTRY["icql_parallel"] = ICQLParallelRunner
