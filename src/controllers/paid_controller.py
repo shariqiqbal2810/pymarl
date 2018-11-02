@@ -1,6 +1,8 @@
+from types import SimpleNamespace
+
 from .basic_controller import BasicMAC
 import itertools
-from copy import deepcopy
+import copy
 import torch as th
 
 
@@ -10,7 +12,9 @@ class PaidMAC (BasicMAC):
     def __init__(self, scheme, groups, args):
         BasicMAC.__init__(self, scheme, groups, args)
         # Create a decetranlised MAC that will be distilled
-        self.decentral_mac = BasicMAC(scheme, groups, args)
+        decentral_args = copy.copy(args)
+        decentral_args.agent = args.decentral_agent
+        self.decentral_mac = BasicMAC(scheme, groups, decentral_args)
         # Define things specific to the PAID MAC
         pass
 

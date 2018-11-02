@@ -32,6 +32,9 @@ name: "paid"
 learner: "paid_learner"
 mac: "paid_mac"
 runner: "icql_parallel"
+agent: "ff"
+decentral_agent: "rnn"
+ff_layer_dims: [64]
 
 # PAID hyper-parameters
 critic_sampling_prob: 0.0
