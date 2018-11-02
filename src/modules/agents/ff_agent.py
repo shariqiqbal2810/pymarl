@@ -5,6 +5,7 @@ class FFAgent(torch.nn.Module):
     def __init__(self, input_shape, args):
         torch.nn.Module.__init__(self)
         self.args = args
+        self.init_nonzeros = getattr(args, "input_initialization_nonzeros", 0)
 
         # Construct a list with all relevant input-output dimensions
         layer_dims = getattr(args, "ff_layer_dims", [])
@@ -15,8 +16,15 @@ class FFAgent(torch.nn.Module):
         self.layers = []
         for d in range(len(layer_dims) - 1):
             self.layers.append(torch.nn.Linear(layer_dims[d], layer_dims[d+1]))
+            # Register this layer's parameters
             self.register_parameter("weight%u" % d, self.layers[-1].weight)
             self.register_parameter("bias%u" % d, self.layers[-1].bias)
+
+        # Initialise first layer with a fixed variance, if specified
+        if self.init_nonzeros > 0:
+            std = self.init_nonzeros ** -0.5
+            self.layers[0].weight.data.normal_(std=std)
+            self.layers[0].bias.data.normal_(std=std)
 
     def init_hidden(self):
         """ Initialise a dummy. """

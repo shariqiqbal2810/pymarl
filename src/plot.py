@@ -4376,7 +4376,7 @@ if plot_please == 147:
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 148
+#plot_please = 148
 if plot_please == 148:
     print("Paid experiment on refactored 10x10 nopain stag-only-hunt.")
     legend = ['Central-V', 'PAID (beta=0.0)', 'PAID (beta=0.05)', 'PAID (beta=0.1)', 'PAID (beta=0.25)']
@@ -4389,6 +4389,43 @@ if plot_please == 148:
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
     max_time = 10E10
     min_time = 6E6  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['black', 'green', 'lime', 'c', 'blue', 'magenta', 'red', 'orange', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(keys), 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title='4 agents(5x5) on stag hunt' if t == 0 else 'in a 10x10 bounded gridworld',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
+                        legend_pos=['upper right'], legend_plot=[False, t==1], **kwargs)
+        for k in range(len(keys)):
+            if keys[k] == "reward_mean":
+                #y_min, y_max = ax[t].get_ylim()
+                ax[t].set_ylim(0.0, 10.0)
+                # Plot horizontal helper lines
+                for i in range(len(keys)):
+                    for h in range(len(reward_horizons)):
+                        ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 149
+if plot_please == 149:
+    print("FF-Paid experiment on refactored 10x10 nopain stag-only-hunt.")
+    legend = ['Central-V', 'PAID (b=0,ff-64)', 'PAID (b=0,ff-128)', 'PAID (b=0,ff-64-64)',
+              'PAID (b=0,ff-128-64)', 'PAID (b=0,ff-64, exp 1M)']
+    names = ['wen_refactor_centralV_stag_hunt_10x10_nopain_aftersoft_011118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-64_beta0.0_021118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-128_beta0.0_021118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-64-64_beta0.0_021118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-128-64_beta0.0_021118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_explore1M_aftersoft_ff-64_beta0.0_021118']
+    keys = ['return_mean', 'ep_length_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 2E6
+    min_time = 0E6  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
     colors = ['black', 'green', 'lime', 'c', 'blue', 'magenta', 'red', 'orange', 'y']
     reward_horizons = [0, 5, 10]
