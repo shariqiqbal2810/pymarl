@@ -4415,17 +4415,18 @@ plot_please = 149
 if plot_please == 149:
     print("FF-Paid experiment on refactored 10x10 nopain stag-only-hunt.")
     legend = ['Central-V', 'PAID (b=0,ff-64)', 'PAID (b=0,ff-128)', 'PAID (b=0,ff-64-64)',
-              'PAID (b=0,ff-128-64)', 'PAID (b=0,ff-64, exp 1M)']
+              'PAID (b=0,ff-128-64)', 'PAID (b=0,ff-64, exp 1M)', 'PAID (b=0,ff-64, init 6)']
     names = ['wen_refactor_centralV_stag_hunt_10x10_nopain_aftersoft_011118',
              'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-64_beta0.0_021118',
              'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-128_beta0.0_021118',
              'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-64-64_beta0.0_021118',
              'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_aftersoft_ff-128-64_beta0.0_021118',
-             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_explore1M_aftersoft_ff-64_beta0.0_021118']
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_explore1M_aftersoft_ff-64_beta0.0_021118',
+             'wen_refactor_paid_stag_hunt_10x10_onlystag_nopain_init_aftersoft_ff-64_beta0.0_021118']
     keys = ['return_mean', 'ep_length_mean']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
-    max_time = 2E6
-    min_time = 0E6  # int(3E6)
+    max_time = 10E6
+    min_time = 7E6  # int(3E6)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
     colors = ['black', 'green', 'lime', 'c', 'blue', 'magenta', 'red', 'orange', 'y']
     reward_horizons = [0, 5, 10]
