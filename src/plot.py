@@ -4122,7 +4122,7 @@ if plot_please == 140:
             ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-#plot_please = 141
+plot_please = 141
 if plot_please == 141:
     print("Refactored 10x10 nopain goathunt exploration experiment [for talk2018oct].")
     legend = ['IQL (no explore)', 'ICQL (no explore)', 'ICQL (sig=1)', 'ICQL (sig=10)',
@@ -4411,7 +4411,7 @@ if plot_please == 148:
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 149
+#plot_please = 149
 if plot_please == 149:
     print("FF-Paid experiment on refactored 10x10 nopain stag-only-hunt.")
     legend = ['Central-V', 'PAID (b=0,ff-64)', 'PAID (b=0,ff-128)', 'PAID (b=0,ff-64-64)',

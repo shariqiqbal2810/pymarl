@@ -55,6 +55,7 @@ class StagHunt(MultiAgentEnv):
         # Add-on for goat-hunts (which like to climb mountains)
         self.mountain_slope = getattr(args, "mountain_slope", 0.0)
         self.capture_conditions = getattr(args, "capture_conditions", [0, 1])
+        self.mountain_spawn = getattr(args, "mountain_spawn", False)
 
         # Downwards compatibility of batch_mode
         self.batch_mode = batch_size is not None
@@ -122,8 +123,10 @@ class StagHunt(MultiAgentEnv):
 
         # Place n_agents and n_preys on the grid
         self._place_actors(self.agents, 0)
-        self._place_actors(self.prey[:self.n_stags, :, :], 1)
-        self._place_actors(self.prey[self.n_stags:, :, :], 2)
+        # Place the stags/goats
+        self._place_actors(self.prey[:self.n_stags, :, :], 1, row=0 if self.mountain_spawn else None)
+        # Place the hares/sheep
+        self._place_actors(self.prey[self.n_stags:, :, :], 2, row=self.env_max[1] if self.mountain_spawn else None)
 
         return self.get_obs(), self.get_state()
 
@@ -276,14 +279,14 @@ class StagHunt(MultiAgentEnv):
         raise NotImplementedError
 
 # ---------- PRIVATE METHODS ---------------------------------------------------------------------------------------
-    def _place_actors(self, actors: np.ndarray, type_id: int):
+    def _place_actors(self, actors: np.ndarray, type_id: int, row=None, col=None):
         for b in range(self.batch_size):
             for a in range(actors.shape[0]):
                 is_free = False
                 while not is_free:
                     # Draw actors's position randomly
-                    actors[a, b, 0] = np.random.randint(self.env_max[0])
-                    actors[a, b, 1] = np.random.randint(self.env_max[1])
+                    actors[a, b, 0] = np.random.randint(self.env_max[0]) if col is None else col
+                    actors[a, b, 1] = np.random.randint(self.env_max[1]) if row is None else row
                     # Check if position is valid
                     is_free = np.sum(self.grid[b, actors[a, b, 0], actors[a, b, 1], :]) == 0
                 self.grid[b, actors[a, b, 0], actors[a, b, 1], type_id] = 1
