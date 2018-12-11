@@ -499,6 +499,85 @@ def plot_db_compare(names, labels=None, title=None, legend=None, keys=None, max_
         plt.show()
 
 
+def plot_db_compare_cs(names, labels=None, title=None, legend=None, keys=None, max_time=None, plot_individuals=None,
+                    pm_std=False, use_sem=False, test=False, colors=None, ax=None, fill_in=False, longest_runs=0,
+                    min_time=0, legend_pos=None, legend_plot=None, bin_size=200):
+    # Definitions
+    if keys is None:
+        keys = ["Episode reward", "Episode length"]
+    else:
+        keys = deepcopy(keys)
+    if labels is None:
+        labels = [None for _ in range(len(names))]
+    if len(keys) == 0:
+        return
+    if test:
+        for i in range(len(keys)):
+            keys[i] = keys[i] + " test"
+    if legend_pos is None:
+        legend_pos = ['lower right', 'upper right']
+    if legend_plot is None:
+        legend_plot = [True, False]
+    if colors is None:
+        colors = ["blue", "green", "red", "black", "magenta", "cyan"]
+    # Retrieve experiments results from data base
+    res = []
+    time = []
+    max_time_found = [0 for _ in range(len(keys))]
+    for i in range(len(names)):
+        res_i, time_i = load_db(keys=keys, name=names[i], test=test, max_time=max_time, fill_in=fill_in,
+                                    longest_runs=longest_runs, bin_size=bin_size, min_time=min_time)
+        if res_i is not None and time_i is not None:
+            res.append(res_i)
+            time.append(time_i)
+            max_time_found[0] = max(max_time_found[0], time_i[-1])
+
+    # Make the figure
+    show_plot = False
+    if ax is None:
+        fig, ax = plt.subplots(len(keys))
+        show_plot = True
+    else:
+        ax = np.reshape(ax, np.size(ax))
+
+    # Make legend
+    if legend is not None:
+        legend = legend.copy()
+        for k in range(len(keys)):
+            if len(keys) > 1:
+                gca = ax[k]
+            else:
+                gca = ax
+            if isinstance(gca, np.ndarray):
+                gca = gca[0]
+            for i in range(min(len(names), len(legend))):
+                gca.fill_between(x=np.array([-2, -1]), y1=np.array([float('nan'), float('nan')]),
+                                 y2=np.array([float('nan'), float('nan')]), alpha=0.2, linewidth=0,
+                                 facecolor=colors[i % len(colors)])
+                if k == 0:
+                    if i < len(res):
+                        legend[i] += " [%u]" % (res[i].shape[0])
+            if legend_plot[k % len(legend_plot)]:
+                gca.legend(legend, loc=legend_pos[k % len(legend_pos)])
+    # Plot results
+    for k in range(len(keys)):
+        if max_time_found[0] > 0:
+            gca = ax[k]
+            for n in range(len(names)):
+                if len(time) > n:
+                    draw_experiments(gca, time[n], res[n][:, :], colors=[colors[n % len(colors)]],
+                                     plot_individuals=plot_individuals, pm_std=pm_std, use_sem=use_sem)
+            gca.set_xlabel("Environmental Steps")
+            gca.set_xlim(0, max_time_found[k])
+            gca.set_ylabel(keys[k] + (" (SEM)" if use_sem else " (STD)"))
+    # Set global title
+    gca = ax[0]
+    if title is not None:
+        gca.set_title(title)
+    # Show figure
+    if show_plot:
+        plt.show()
+
 def print_db_experiments(starting_with):
     # Open a mongo DB client
     db_url = "mongodb://pymarlOwner:EMC7Jp98c8rE7FxxN7g82DT5spGsVr9A@gandalf.cs.ox.ac.uk:27017/pymarl"
@@ -4447,4 +4526,43 @@ if plot_please == 149:
                 for i in range(len(keys)):
                     for h in range(len(reward_horizons)):
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 150
+if plot_please == 150:
+    print("Starcraft 2 MACKRL stuff")
+    legend = ['Central-V', 'MACKRL']
+    names = [['F4I_CENTRALV_5m_v_6m', 'F4I_FLOUNDERL_5m_v_6m'],
+             ['F4I_CENTRALV_3s_v_3z', 'F4I_FLOUNDERL_3s_v_3z'],
+             ['F4I_CENTRALV_micro_colossus', 'F4I_FLOUNDERL_micro_colossus'],
+             ['F4I_CENTRALV_micro_retarget', 'F4I_FLOUNDERL_micro_retarget'],
+             ['F4I_CENTRALV_micro_focus', 'F4I_FLOUNDERL_micro_focus'],
+             ['F4I_CENTRALV_micro_2M_Z', 'F4I_FLOUNDERL_micro_2M_Z']
+            ]
+    titles = ['5m vs. 6m', '3s vs. 3z', 'Micro Colossus',
+              'Micro Retarget', 'Micro Focus', 'Micro 2m z'
+             ]
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = None  # 2.5E6
+    min_time = 0  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(names), 2)
+    # Plot all levels
+    for l in range(len(names)):
+        # Plot keys and their test
+        for t in range(2):
+            plot_db_compare_cs(names[l], keys=keys, title=titles[l],
+                               test=t==1, max_time=max_time, min_time=min_time,
+                               colors=colors, longest_runs=0, ax=ax[l, t], legend=legend,
+                               legend_pos=['upper left'], legend_plot=[True], **kwargs)
+            #y_min, y_max = ax[t].get_ylim()
+            #ax.set_ylim(0.0, 1.0)
+            # Plot horizontal helper lines
+            #for i in range(len(keys)):
+            #    for h in range(len(reward_horizons)):
+            #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()

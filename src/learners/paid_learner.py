@@ -10,7 +10,7 @@ class PaidLearner(ACL):
         ACL.__init__(self, mac, scheme, logger, args)
         assert isinstance(mac, PaidMAC), "The MAC trained by PAID must be derived from PaidMAC."
         self.distillation_factor = getattr(args, "distillation_factor", 1.0)
-        self.prior_factor = getattr(args, "prior_factor", self.distillation_factor)
+        self.prior_factor = getattr(args, "prior_factor", 1.0)
         self.propagate_divergence = getattr(args, "propagate_divergence", True)
 
     def train(self, batch: EpisodeBatch, t_env: int, episode_num: int):

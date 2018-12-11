@@ -59,7 +59,7 @@ class PaidMAC (BasicMAC):
         """ Empty interface to comply with ICQLParallelRunner. """
         pass
 
-    def _build_inputs(self, batch, t):
+    def NOT_build_inputs(self, batch, t):
         """ Overwrites the BasicMAC to build inputs that contain the state and the last action. """
         # Assumes homogeneous agents with flat observations.
         # Other MACs might want to e.g. delegate building inputs to each agent
@@ -77,7 +77,7 @@ class PaidMAC (BasicMAC):
         inputs = th.cat([x.reshape(bs*self.n_agents, -1) for x in inputs], dim=1)
         return inputs
 
-    def _get_input_shape(self, scheme):
+    def NOT_get_input_shape(self, scheme):
         """ This controller is centralised, i.e., it is an RNN that takes the state and the previous action."""
         input_shape = scheme["state"]["vshape"]
         if self.args.obs_last_action:

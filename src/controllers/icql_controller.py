@@ -5,6 +5,7 @@ from copy import deepcopy
 import torch as th
 from components.intrinsic_rewards import LinearVarianceReward
 
+
 # noinspection PyUnresolvedReferences
 class ICQLMAC(BasicMAC):
     """ A basic MAC with an additional COMA critic for ICQL. """
