@@ -126,7 +126,7 @@ class StagHunt(MultiAgentEnv):
         # Place the stags/goats
         self._place_actors(self.prey[:self.n_stags, :, :], 1, row=0 if self.mountain_spawn else None)
         # Place the hares/sheep
-        self._place_actors(self.prey[self.n_stags:, :, :], 2, row=self.env_max[1] if self.mountain_spawn else None)
+        self._place_actors(self.prey[self.n_stags:, :, :], 2, row=self.env_max[1]-1 if self.mountain_spawn else None)
 
         return self.get_obs(), self.get_state()
 
