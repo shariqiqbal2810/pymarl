@@ -285,8 +285,8 @@ class StagHunt(MultiAgentEnv):
                 is_free = False
                 while not is_free:
                     # Draw actors's position randomly
-                    actors[a, b, 0] = np.random.randint(self.env_max[0]) if col is None else col
-                    actors[a, b, 1] = np.random.randint(self.env_max[1]) if row is None else row
+                    actors[a, b, 0] = np.random.randint(self.env_max[0]) if row is None else row
+                    actors[a, b, 1] = np.random.randint(self.env_max[1]) if col is None else col
                     # Check if position is valid
                     is_free = np.sum(self.grid[b, actors[a, b, 0], actors[a, b, 1], :]) == 0
                 self.grid[b, actors[a, b, 0], actors[a, b, 1], type_id] = 1
