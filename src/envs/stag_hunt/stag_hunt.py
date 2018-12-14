@@ -123,7 +123,7 @@ class StagHunt(MultiAgentEnv):
         self.grid.fill(0.0)
 
         # Place n_agents and n_preys on the grid
-        self._place_actors(self.agents, 0, row=self.mountain_agent_row)
+        self._place_actors(self.agents, 0, row=self.mountain_agent_row if self.mountain_agent_row>= 0 else None)
         # Place the stags/goats
         self._place_actors(self.prey[:self.n_stags, :, :], 1, row=0 if self.mountain_spawn else None)
         # Place the hares/sheep
@@ -533,9 +533,10 @@ class StagHunt(MultiAgentEnv):
 # ######################################################################################################################
 if __name__ == "__main__":
     env_args = {
-        'world_shape': (4, 4),
+        'world_shape': (6, 6),
         'toroidal': False,
         'mountain_spawn': True,
+        'mountain_agent_row': 4,
         'observe_walls': False,
         'observe_ids': False,
         'observe_one_hot': False,
@@ -562,7 +563,7 @@ if __name__ == "__main__":
     print("Env is ", "batched" if env.batch_mode else "not batched")
 
     if True:
-        grid = state.reshape((4, 4, 3))
+        grid = state.reshape((6, 6, 3))
         for i in range(grid.shape[2]):
             print(grid[:, :, i], '\n')
 
