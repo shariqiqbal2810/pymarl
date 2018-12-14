@@ -11,6 +11,7 @@ env_args:
     intersection_unknown: False
     mountain_slope: 0.5 # Probability that an "up" action will not be executed (stag_hunt = 0.0)
     mountain_spawn: True # Whether prey spawns in their preferred habitat (True) or randomly (False)
+    mountain_agent_row: 1 # the row in which the agents are spawned. Negative values spawn agents randomly.
     n_agents: 4
     n_hare: 1
     n_stags: 1
