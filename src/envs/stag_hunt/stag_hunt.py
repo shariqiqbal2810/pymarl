@@ -536,7 +536,7 @@ if __name__ == "__main__":
         'world_shape': (6, 6),
         'toroidal': False,
         'mountain_spawn': True,
-        'mountain_agent_row': 4,
+        'mountain_agent_row': -1,
         'observe_walls': False,
         'observe_ids': False,
         'observe_one_hot': False,

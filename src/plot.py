@@ -4606,7 +4606,7 @@ if plot_please == 151:
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 152
+#plot_please = 152
 if plot_please == 152:
     print("Parameter exploration for IQL the goat_hunt with mountain_spawn, with correct rows and columns (I hope)!")
     title = "IQL on goat hunt in preferred habitats"
@@ -4640,4 +4640,113 @@ if plot_please == 152:
                 for i in range(len(keys)):
                     for h in range(len(reward_horizons)):
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 153
+if plot_please == 153:
+    print("Parameter exploration for IQL the goat_hunt with mountain_spawn, and agents spawn in row directly over sheep!")
+    title = "IQL on goat hunt in preferred habitats (h1)"
+    legend = ['slope=0.0', 'slope=0.2', 'slope=0.4', 'slope=0.6', 'slope=0.8']
+    names = ['wen_refactor_iql_goat_hunt_spawn_ar1_slope0.0_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar1_slope0.2_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar1_slope0.4_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar1_slope0.6_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar1_slope0.8_141218']
+    keys = ['return_mean', 'ep_length_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 10E6
+    min_time = 0E6  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['black', 'green', 'blue', 'red', 'orange', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(keys), 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title=title if t == 0 else 'in a 10x10 bounded gridworld',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
+                        legend_pos=['upper right'], legend_plot=[False, t==1], **kwargs)
+        for k in range(len(keys)):
+            print(keys[k])
+            if keys[k] == "return_mean":
+                #y_min, y_max = ax[t].get_ylim()
+                ax[k,t].set_ylim(0.0, 10.1)
+                # Plot horizontal helper lines
+                for i in range(len(keys)):
+                    for h in range(len(reward_horizons)):
+                        ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 154
+if plot_please == 154:
+    print("Parameter exploration for IQL the goat_hunt with mountain_spawn, and agents spawn in row directly over sheep!")
+    title = "IQL on goat hunt in preferred habitats (h4)"
+    legend = ['slope=0.0', 'slope=0.2', 'slope=0.4', 'slope=0.6', 'slope=0.8']
+    names = ['wen_refactor_iql_goat_hunt_spawn_ar5_slope0.0_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar5_slope0.2_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar5_slope0.4_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar5_slope0.6_141218',
+             'wen_refactor_iql_goat_hunt_spawn_ar5_slope0.8_141218']
+    keys = ['return_mean', 'ep_length_mean']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': False, 'bin_size': 100}
+    max_time = 10E6
+    min_time = 0E6  # int(3E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['black', 'green', 'blue', 'red', 'orange', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(keys), 2)
+    # Plot keys and their test
+    for t in range(2):
+        plot_db_compare(names, keys=keys, refactored=True,
+                        title=title if t == 0 else 'in a 10x10 bounded gridworld',
+                        test=t == 1, max_time=max_time, min_time=min_time,
+                        colors=colors, longest_runs=0, ax=ax[:, t], legend=legend if t == 1 else None,
+                        legend_pos=['upper right'], legend_plot=[False, t==1], **kwargs)
+        for k in range(len(keys)):
+            print(keys[k])
+            if keys[k] == "return_mean":
+                #y_min, y_max = ax[t].get_ylim()
+                ax[k,t].set_ylim(0.0, 10.1)
+                # Plot horizontal helper lines
+                for i in range(len(keys)):
+                    for h in range(len(reward_horizons)):
+                        ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 155
+if plot_please == 155:
+    print("Starcraft 2 MACKRL stuff V2")
+    #legend = ['MACKRL 1', 'MACKRL 2', 'MACKRL 3']
+    legend = ['Central-V', 'MACKRL']
+    names = [#['F4I_FLOUNDERL_2s3z__partconst_1', 'F4I_FLOUNDERL_2s3z__partconst_2', 'F4I_FLOUNDERL_2s3z__partconst_3'],
+              ['F4I_centralv_micro_baneling', 'F4I_FLOUNDERL_micro_baneling']]
+    titles = [#'2s3z',
+              'micro baneling']
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = 1.5E6  # 2.5E6
+    min_time = int(5E5)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(names), 2)
+    # Plot all levels
+    for l in range(len(names)):
+        # Plot keys and their test
+        for t in range(2):
+            gca = ax[l, t] if len(names) > 1 else ax[t]
+            plot_db_compare_cs(names=names[l], keys=keys, title=titles[l],
+                               test=t==1, max_time=max_time, min_time=min_time,
+                               colors=colors, longest_runs=0, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[True], **kwargs)
+            #y_min, y_max = ax[t].get_ylim()
+            gca.set_ylim(0.0, 1.0)
+            # Plot horizontal helper lines
+            #for i in range(len(keys)):
+            #    for h in range(len(reward_horizons)):
+            #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
