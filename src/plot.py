@@ -2,8 +2,6 @@
 
 import json
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import colors as mcolors
 import torch
 import numpy as np
 import math
@@ -198,12 +196,13 @@ def plot_comparison(id_lists, title=None, legend=None, directory="results", max_
 
 
 def load_db(keys, name, test=False, max_time=None, fill_in=True, longest_runs=0, min_time=0, bin_size=200,
-            refactored=False):
+            refactored=False, time_str=None):
     min_time_steps = 10
-    if refactored:
-        time_str = "test_episode_T" if test else "episode_T"
-    else:
-        time_str = "T env test" if test else "T env"
+    if time_str is None:
+        if refactored:
+            time_str = "test_episode_T" if test else "episode_T"
+        else:
+            time_str = "T env test" if test else "T env"
     print("Looking for ", name, keys[0], time_str, test)
     # Open a mongo DB client
     db_url = "mongodb://pymarlOwner:EMC7Jp98c8rE7FxxN7g82DT5spGsVr9A@gandalf.cs.ox.ac.uk:27017/pymarl"
@@ -501,7 +500,7 @@ def plot_db_compare(names, labels=None, title=None, legend=None, keys=None, max_
 
 def plot_db_compare_cs(names, labels=None, title=None, legend=None, keys=None, max_time=None, plot_individuals=None,
                     pm_std=False, use_sem=False, test=False, colors=None, ax=None, fill_in=False, longest_runs=0,
-                    min_time=0, legend_pos=None, legend_plot=None, bin_size=200):
+                    min_time=0, legend_pos=None, legend_plot=None, bin_size=200, time_str=None):
     # Definitions
     if keys is None:
         keys = ["Episode reward", "Episode length"]
@@ -526,7 +525,7 @@ def plot_db_compare_cs(names, labels=None, title=None, legend=None, keys=None, m
     max_time_found = [0 for _ in range(len(keys))]
     for i in range(len(names)):
         res_i, time_i = load_db(keys=keys, name=names[i], test=test, max_time=max_time, fill_in=fill_in,
-                                    longest_runs=longest_runs, bin_size=bin_size, min_time=min_time)
+                                    longest_runs=longest_runs, bin_size=bin_size, min_time=min_time, time_str=time_str)
         if res_i is not None and time_i is not None:
             res.append(res_i)
             time.append(time_i)
@@ -565,7 +564,8 @@ def plot_db_compare_cs(names, labels=None, title=None, legend=None, keys=None, m
             gca = ax[k]
             for n in range(len(names)):
                 if len(time) > n:
-                    draw_experiments(gca, time[n], res[n][:, :], colors=[colors[n % len(colors)]],
+                    res_key = res[n][:, :] if len(keys) == 1 else res[n][:, k, :]
+                    draw_experiments(gca, time[n], res_key, colors=[colors[n % len(colors)]],
                                      plot_individuals=plot_individuals, pm_std=pm_std, use_sem=use_sem)
             gca.set_xlabel("Environmental Steps")
             gca.set_xlim(0, max_time_found[k])
@@ -4716,7 +4716,7 @@ if plot_please == 154:
                         ax[k, t].plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 155
+#plot_please = 155
 if plot_please == 155:
     print("Starcraft 2 MACKRL stuff V2")
     #legend = ['MACKRL 1', 'MACKRL 2', 'MACKRL 3']
@@ -4727,7 +4727,7 @@ if plot_please == 155:
               'micro baneling']
     keys = ['Win rate']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
-    max_time = 1.5E6  # 2.5E6
+    max_time = None  # 2.5E6
     min_time = int(5E5)
     #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
     colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
@@ -4749,4 +4749,180 @@ if plot_please == 155:
             #for i in range(len(keys)):
             #    for h in range(len(reward_horizons)):
             #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 156
+if plot_please == 156:
+    print("Starcraft 2 MACKRL on 2s3z with randomly constrained partitions")
+    legend = ['Central-V', 'MACKRL (full)', 'MACKRL (10 part)', 'MACKRL (5 part)', 'MACKRL (3 part)', 'MACKRL (1 part)']
+    names = [['HAWAII2_CENTRALV_2s3z', 'HAWAII2_FLOUNDERL_2s3z', 'F4I_FL_partconst_size10',
+              'F4I_FL_partconst_size5', 'F4I_FL_partconst_size3', 'F4I_FL_partconst_size1_']]
+    titles = ['StarCraft2: 2s3z']
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = None  # 2.5E6
+    min_time = int(0)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['red', 'blue', 'magenta', 'green',  'black', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(names), 2)
+    # Plot all levels
+    for l in range(len(names)):
+        # Plot keys and their test
+        for t in range(2):
+            gca = ax[l, t] if len(names) > 1 else ax[t]
+            plot_db_compare_cs(names=names[l], keys=keys, title=titles[l],
+                               test=t==1, max_time=max_time, min_time=min_time,
+                               colors=colors, longest_runs=6, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[True], **kwargs)
+            #y_min, y_max = ax[t].get_ylim()
+            gca.set_ylim(0.0, 1.0)
+            # Plot horizontal helper lines
+            #for i in range(len(keys)):
+            #    for h in range(len(reward_horizons)):
+            #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 157
+if plot_please == 157:
+    print("Starcraft 2 MACKRL on 2s3z with randomly constrained partitions (new runs)")
+    legend = ['MACKRL (full)', 'MACKRL (5 part)', 'MACKRL (3 part)', 'MACKRL (1 part)', 'Central-V']
+    names = [['HAWAII2_FLOUNDERL_2s3z', 'F4I_FL_2_partconst_size5', 'F4I_FL_2_partconst_size3',
+              'F4I_FL_partconst_size1_', 'HAWAII2_CENTRALV_2s3z']]
+    titles = ['StarCraft II: 2s3z']
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = None  # 2.5E6
+    min_time = int(4E6)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['blue', 'magenta', 'green',  'y', 'red']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(1)
+    # Plot all levels
+    for l in range(len(names)):
+        # Plot keys and their test
+        #for t in range(2):
+            t = 1
+            gca = ax
+            plot_db_compare_cs(names=names[l], keys=keys, title=titles[l],
+                               test=t==1, max_time=max_time, min_time=min_time,
+                               colors=colors, longest_runs=20, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[True], **kwargs)
+            #y_min, y_max = ax[t].get_ylim()
+            gca.set_ylim(0.0, 1.0)
+            # Plot horizontal helper lines
+            #for i in range(len(keys)):
+            #    for h in range(len(reward_horizons)):
+            #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+#plot_please = 158
+if plot_please == 158:
+    print("Starcraft 2 MACKRL on new levels")
+    legend = ['MACKRL', 'Central-V']
+    names = [['F4I_FL_10m_2_partconst100_', 'F4I_CV_2_10m'],
+             #['F4I_FL_2_3s4z', 'F4I_CV_3s4z'],
+             #['F4I_FL_2_8m', 'F4I_CV_8m']
+            ]
+    titles = ['StarCraft II: 10m (100 part)', 'StarCraft II: 3s4z', 'StarCraft II: 8m']
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = None  # 2.5E6
+    min_time = int(3E5)
+    #colors = ['y', 'orange', 'red', 'green', 'c', 'blue']
+    colors = ['blue', 'red', 'magenta', 'green',  'c', 'red', 'y']
+    reward_horizons = [0, 5, 10]
+    ep_length_horizons = []  # [15, 20, 25, 30, 40, 50]
+    fig, ax = plt.subplots(len(names), 1)
+    # Plot all levels
+    for l in range(len(names)):
+        # Plot keys and their test
+        for t in range(1):
+            gca = ax[l] if len(names) > 1 else ax
+            plot_db_compare_cs(names=names[l], keys=keys, title=titles[l],
+                               test=t==1, max_time=max_time, min_time=min_time,
+                               colors=colors, longest_runs=0, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[True], **kwargs)
+            #y_min, y_max = ax[t].get_ylim()
+            gca.set_ylim(0.0, 1.0)
+            # Plot horizontal helper lines
+            #for i in range(len(keys)):
+            #    for h in range(len(reward_horizons)):
+            #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
+    plt.show()
+
+plot_please = 159
+if plot_please == 159:
+    print("Final plot of 3m, 8m and 2s3z for MACKRL ICML paper")
+    legend = ['MACKRL', 'Central-V', 'MACKRL (10 part)']
+    names = [['HAWAII2_FLOUNDERL_3m', 'HAWAII2_CENTRALV_3m'],
+             ['F4I_FL_2_8m', 'F4I_CV_8m', 'F4I_FL_8m_partconst_size10'],
+             ['HAWAII2_FLOUNDERL_2s3z', 'HAWAII2_CENTRALV_2s3z']]
+    titles = ['StarCraft II: 3m vs. 3m', 'StarCraft II: 8m vs. 8m', 'StarCraft II: 2s3z vs. 2s3z']
+    keys = ['Win rate']
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
+    max_time = [3.5E6, 3.5E6, None]
+    min_time = int(0E6)
+    horizons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    minmax = [[0.6, 1.0], [0.6, 1.0], [0.0, 1.0]]
+    colors = ['blue', 'red', 'magenta']
+    fig, ax = plt.subplots(1, len(names))
+    # Plot all levels
+    for l in range(len(names)):
+            # Plot keys and their test
+            gca = ax[l] if len(names) > 1 else ax
+            plot_db_compare_cs(names=names[l], keys=keys, title=titles[l],
+                               test=True, max_time=max_time[l], min_time=min_time,
+                               colors=colors, longest_runs=20, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[True], **kwargs)
+            # Plot horizontal helper lines
+            for h in range(len(horizons)):
+                for i in range(len(keys)):
+                    if keys[i] == 'Win rate':
+                        gca.plot(np.array([0, 1E100]), horizons[h] * np.ones(2), linestyle=':', color='black')
+            gca.set_ylim(minmax[l][0], minmax[l][1])
+    plt.show()
+
+#plot_please = 159
+if plot_please == 159:
+    print("MACKRL plot for Gaussian noise?")
+    legend = ['MACKRL', 'Central-V']
+    names = ['HAWAII2_FLOUNDERL_2s3z', 'HAWAII2_CENTRALV_2s3z']
+    noisyname = ['F4I_FL_2s3z_2_noisy']
+    titles = ['StarCraft II: 2s3z vs. 2s3z']
+    noises = ['0.0', '0.01', '0.1', '1.0']
+    keys = ['Win rate']
+    noisekey = 'Win rate noise%s'
+    kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 50}
+    max_time = 7E5
+    min_time = int(6E5)
+    horizons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    minmax = [0.0, 1.0]
+    colors = ['blue', 'red', 'y', 'orange', 'green', 'c', 'black']
+    fig, ax = plt.subplots(1)
+    # Plot all noise levels
+    for n in range(len(noises)):
+            # Plot keys and their test
+            gca = ax
+            plot_db_compare_cs(names=noisyname, keys=[noisekey % noises[n]], title=None,
+                               time_str='T env noise%s test' % noises[n],
+                               test=True, max_time=max_time, min_time=min_time,
+                               colors=[colors[n+2]], longest_runs=0, ax=gca, legend=legend,
+                               legend_pos=['lower right'], legend_plot=[False], **kwargs)
+            # Plot horizontal helper lines
+            #for h in range(len(horizons)):
+            #    for i in range(len(keys)):
+            #        if keys[i] == 'Win rate':
+            #            gca.plot(np.array([0, 1E100]), horizons[h] * np.ones(2), linestyle=':', color='black')
+            #
+    # Plot original curves
+    gca = ax
+    plot_db_compare_cs(names=names, keys=keys, title=titles[0],
+                       test=True, max_time=max_time, min_time=min_time,
+                       colors=colors, longest_runs=20, ax=gca, legend=legend,
+                       legend_pos=['lower right'], legend_plot=[False], **kwargs)
+    gca.set_ylim(minmax[0], minmax[1])
+    # Show figure
     plt.show()
