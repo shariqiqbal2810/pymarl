@@ -4864,7 +4864,7 @@ if plot_please == 159:
     keys = ['Win rate']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
     max_time = [3.5E6, 3.5E6, None]
-    min_time = int(0E6)
+    min_time = int(1.8E6)
     horizons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     minmax = [[0.6, 1.0], [0.6, 1.0], [0.0, 1.0]]
     colors = ['blue', 'red', 'magenta']
@@ -4885,8 +4885,8 @@ if plot_please == 159:
             gca.set_ylim(minmax[l][0], minmax[l][1])
     plt.show()
 
-#plot_please = 159
-if plot_please == 159:
+#plot_please = 160
+if plot_please == 160:
     print("MACKRL plot for Gaussian noise?")
     legend = ['MACKRL', 'Central-V']
     names = ['HAWAII2_FLOUNDERL_2s3z', 'HAWAII2_CENTRALV_2s3z']
