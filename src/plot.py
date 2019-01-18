@@ -4853,18 +4853,18 @@ if plot_please == 158:
             #        ax.plot(np.array([0, 1E100]), reward_horizons[h] * np.ones(2), linestyle=':', color='black')
     plt.show()
 
-plot_please = 159
+#plot_please = 159
 if plot_please == 159:
     print("Final plot of 3m, 8m and 2s3z for MACKRL ICML paper")
-    legend = ['MACKRL', 'Central-V', 'MACKRL (10 part)']
+    legend = ['MACKRL (full)', 'Central-V', 'MACKRL (10 part)']
     names = [['HAWAII2_FLOUNDERL_3m', 'HAWAII2_CENTRALV_3m'],
              ['F4I_FL_2_8m', 'F4I_CV_8m', 'F4I_FL_8m_partconst_size10'],
              ['HAWAII2_FLOUNDERL_2s3z', 'HAWAII2_CENTRALV_2s3z']]
     titles = ['StarCraft II: 3m vs. 3m', 'StarCraft II: 8m vs. 8m', 'StarCraft II: 2s3z vs. 2s3z']
     keys = ['Win rate']
     kwargs = {'pm_std': False, 'use_sem': True, 'plot_individuals': '', 'fill_in': True, 'bin_size': 100}
-    max_time = [3.5E6, 3.5E6, None]
-    min_time = int(1.8E6)
+    max_time = [2E6, 2E6, 5E6]
+    min_time = int(0E6)
     horizons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     minmax = [[0.6, 1.0], [0.6, 1.0], [0.0, 1.0]]
     colors = ['blue', 'red', 'magenta']
@@ -4883,6 +4883,8 @@ if plot_please == 159:
                     if keys[i] == 'Win rate':
                         gca.plot(np.array([0, 1E100]), horizons[h] * np.ones(2), linestyle=':', color='black')
             gca.set_ylim(minmax[l][0], minmax[l][1])
+            #gca.set_xlim(1E3, max_time[l])
+            #gca.set_xscale("log")
     plt.show()
 
 #plot_please = 160
